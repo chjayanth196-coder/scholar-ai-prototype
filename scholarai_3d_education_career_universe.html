@@ -1,0 +1,2183 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SCHOLARAI — Fund Your Education. Learn. Intern. Build. Grow.</title>
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <!-- Three.js (r128) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Outfit', 'sans-serif'],
+            mono: ['Space Grotesk', 'monospace'],
+          },
+          colors: {
+            brand: {
+              dark: '#050814',
+              space: '#090E24',
+              card: 'rgba(15, 23, 42, 0.72)',
+              cyan: '#00F2FE',
+              blue: '#4FACFE',
+              violet: '#7F00FF',
+              magenta: '#E100FF',
+              gold: '#FFD700',
+              emerald: '#10B981'
+            }
+          },
+          animation: {
+            'pulse-glow': 'pulseGlow 3s ease-in-out infinite',
+            'float-slow': 'floating 4s ease-in-out infinite',
+          },
+          keyframes: {
+            pulseGlow: {
+              '0%, 100%': { opacity: '0.4', transform: 'scale(1)' },
+              '50%': { opacity: '0.8', transform: 'scale(1.05)' }
+            },
+            floating: {
+              '0%, 100%': { transform: 'translateY(0px)' },
+              '50%': { transform: 'translateY(-10px)' }
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* Custom Scrollbar and Glass Effects */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #060919; }
+    ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 999px; }
+    ::-webkit-scrollbar-thumb:hover { background: #3b82f6; }
+
+    .glass-panel {
+      background: rgba(13, 19, 39, 0.65);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    }
+    
+    .glass-card-interactive {
+      transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .glass-card-interactive:hover {
+      transform: translateY(-6px) scale(1.01);
+      border-color: rgba(0, 242, 254, 0.4);
+      box-shadow: 0 25px 40px -15px rgba(0, 242, 254, 0.25);
+    }
+
+    .neon-text-glow {
+      text-shadow: 0 0 20px rgba(0, 242, 254, 0.5), 0 0 40px rgba(127, 0, 255, 0.3);
+    }
+    
+    .hud-gradient-border {
+      position: relative;
+    }
+    .hud-gradient-border::after {
+      content: '';
+      position: absolute;
+      inset: -1px;
+      border-radius: inherit;
+      padding: 1px;
+      background: linear-gradient(135deg, rgba(0,242,254,0.4), rgba(225,0,255,0.2), rgba(255,215,0,0.1));
+      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+      pointer-events: none;
+    }
+
+    canvas#webgl-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: 0;
+      pointer-events: auto;
+    }
+  </style>
+</head>
+<body class="bg-[#050814] text-slate-100 font-sans min-h-screen overflow-x-hidden selection:bg-brand-cyan/30 selection:text-white">
+
+  <!-- 3D Three.js Background Canvas -->
+  <canvas id="webgl-canvas"></canvas>
+
+  <!-- Header / Navigation Bar -->
+  <header class="fixed top-0 left-0 right-0 z-40 px-4 py-3 md:px-8">
+    <div class="max-w-7xl mx-auto glass-panel rounded-2xl px-4 py-2.5 flex items-center justify-between border border-white/10">
+      
+      <!-- Logo -->
+      <div class="flex items-center space-x-3 cursor-pointer group" onclick="flyToStation('hero')">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-cyan-500 via-blue-600 to-fuchsia-600 p-[2px] shadow-lg shadow-cyan-500/20 group-hover:scale-105 transition-transform">
+          <div class="w-full h-full bg-[#070B19] rounded-[10px] flex items-center justify-center">
+            <i class="fa-solid fa-graduation-cap text-cyan-400 text-lg group-hover:rotate-12 transition-transform"></i>
+          </div>
+        </div>
+        <div>
+          <div class="flex items-center space-x-1.5">
+            <span class="font-extrabold text-xl tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-blue-400 to-fuchsia-400 font-mono">SCHOLAR<span class="text-white">AI</span></span>
+            <span class="text-[10px] px-1.5 py-0.5 rounded bg-cyan-500/20 text-cyan-300 font-mono font-semibold border border-cyan-500/30">3D CORE</span>
+          </div>
+          <p class="text-[10px] text-slate-400 hidden sm:block -mt-1 tracking-tight">Fund. Learn. Intern. Build. Grow.</p>
+        </div>
+      </div>
+
+      <!-- 3D Navigation Stations (Camera Anchors) -->
+      <nav class="hidden lg:flex items-center space-x-1 bg-slate-900/60 p-1.5 rounded-xl border border-white/5 text-xs font-medium">
+        <button onclick="flyToStation('hero')" id="nav-btn-hero" class="px-3 py-1.5 rounded-lg text-cyan-300 bg-cyan-500/10 transition-all hover:text-white">
+          <i class="fa-solid fa-compass mr-1"></i> Universe
+        </button>
+        <button onclick="flyToStation('funding')" id="nav-btn-funding" class="px-3 py-1.5 rounded-lg text-slate-300 hover:text-cyan-400 hover:bg-white/5 transition-all">
+          <i class="fa-solid fa-coins mr-1"></i> Funding
+        </button>
+        <button onclick="flyToStation('aimatch')" id="nav-btn-aimatch" class="px-3 py-1.5 rounded-lg text-slate-300 hover:text-cyan-400 hover:bg-white/5 transition-all">
+          <i class="fa-solid fa-brain mr-1"></i> AI Matcher
+        </button>
+        <button onclick="flyToStation('career')" id="nav-btn-career" class="px-3 py-1.5 rounded-lg text-slate-300 hover:text-cyan-400 hover:bg-white/5 transition-all">
+          <i class="fa-solid fa-diagram-project mr-1"></i> Career Graph
+        </button>
+        <button onclick="flyToStation('internships')" id="nav-btn-internships" class="px-3 py-1.5 rounded-lg text-slate-300 hover:text-cyan-400 hover:bg-white/5 transition-all">
+          <i class="fa-solid fa-briefcase mr-1"></i> Internships
+        </button>
+        <button onclick="flyToStation('portals')" id="nav-btn-portals" class="px-3 py-1.5 rounded-lg text-slate-300 hover:text-cyan-400 hover:bg-white/5 transition-all">
+          <i class="fa-solid fa-terminal mr-1"></i> Command Portals
+        </button>
+      </nav>
+
+      <!-- Right Action Items -->
+      <div class="flex items-center space-x-2 md:space-x-3">
+        <!-- Global Search Trigger -->
+        <button onclick="toggleModal('search-modal')" class="p-2 rounded-xl bg-white/5 hover:bg-cyan-500/20 text-slate-300 hover:text-cyan-300 border border-white/10 transition-colors" title="Global AI Search">
+          <i class="fa-solid fa-magnifying-glass text-xs"></i>
+        </button>
+
+        <!-- Notification Bell -->
+        <button onclick="toggleModal('notifications-modal')" class="relative p-2 rounded-xl bg-white/5 hover:bg-fuchsia-500/20 text-slate-300 hover:text-fuchsia-300 border border-white/10 transition-colors" title="Notifications">
+          <i class="fa-solid fa-bell text-xs"></i>
+          <span class="absolute top-1 right-1 w-2 h-2 rounded-full bg-cyan-400 animate-ping"></span>
+          <span class="absolute top-1 right-1 w-2 h-2 rounded-full bg-cyan-400"></span>
+        </button>
+
+        <!-- Particle Engine Quality Switcher -->
+        <button onclick="toggleParticleEngine()" id="perf-toggle-btn" class="hidden sm:flex items-center space-x-1.5 px-2.5 py-1.5 rounded-xl bg-white/5 text-[11px] font-mono text-emerald-400 border border-emerald-500/30 hover:bg-emerald-500/10 transition-colors" title="Switch 3D Fidelity">
+          <i class="fa-solid fa-microchip"></i>
+          <span id="perf-status-text">60 FPS • HIGH</span>
+        </button>
+
+        <!-- Portal Role Selector -->
+        <div class="relative">
+          <button onclick="togglePortalDropdown()" id="portal-role-btn" class="flex items-center space-x-2 px-3 py-1.5 rounded-xl bg-gradient-to-r from-blue-600/40 to-fuchsia-600/40 hover:from-blue-600/60 hover:to-fuchsia-600/60 border border-white/20 text-xs font-semibold shadow-lg">
+            <i class="fa-solid fa-id-badge text-cyan-300"></i>
+            <span id="current-role-label">Student Hub</span>
+            <i class="fa-solid fa-chevron-down text-[10px] text-slate-400"></i>
+          </button>
+          
+          <!-- Dropdown -->
+          <div id="portal-role-menu" class="hidden absolute right-0 mt-2 w-48 glass-panel rounded-xl py-2 z-50 border border-white/15 shadow-2xl">
+            <div class="px-3 py-1 text-[10px] font-mono text-slate-400 uppercase tracking-wider">Switch Portal Role</div>
+            <button onclick="switchRole('Student')" class="w-full text-left px-3 py-2 text-xs hover:bg-cyan-500/20 text-cyan-300 flex items-center space-x-2">
+              <i class="fa-solid fa-user-graduate w-4"></i> <span>Student Profile</span>
+            </button>
+            <button onclick="switchRole('College')" class="w-full text-left px-3 py-2 text-xs hover:bg-blue-500/20 text-blue-300 flex items-center space-x-2">
+              <i class="fa-solid fa-building-columns w-4"></i> <span>College Command</span>
+            </button>
+            <button onclick="switchRole('Organization')" class="w-full text-left px-3 py-2 text-xs hover:bg-fuchsia-500/20 text-fuchsia-300 flex items-center space-x-2">
+              <i class="fa-solid fa-landmark-flag w-4"></i> <span>Organization / Trust</span>
+            </button>
+            <button onclick="switchRole('SuperAdmin')" class="w-full text-left px-3 py-2 text-xs hover:bg-amber-500/20 text-amber-300 flex items-center space-x-2">
+              <i class="fa-solid fa-shield-halved w-4"></i> <span>Super Admin Gov</span>
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </header>
+
+  <!-- HUD 3D Spatial Navigation Compass -->
+  <div class="fixed bottom-6 left-6 z-30 hidden md:flex items-center space-x-3 glass-panel px-3.5 py-2.5 rounded-2xl border border-white/10 text-xs">
+    <div class="flex items-center space-x-2">
+      <div class="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-pulse"></div>
+      <span class="font-mono text-slate-300">SPATIAL COORD:</span>
+      <span id="hud-coord-text" class="font-mono font-bold text-cyan-300">[X: 0.0, Y: 0.0, Z: 32.0]</span>
+    </div>
+    <div class="h-4 w-[1px] bg-white/20"></div>
+    <div class="text-[11px] text-slate-400">
+      <span id="hud-station-label">STATION 0: UNIVERSE CORE</span>
+    </div>
+  </div>
+
+  <!-- Persistent 3D AI Assistant Floating Button -->
+  <div class="fixed bottom-6 right-6 z-40">
+    <button onclick="toggleAIAssistantDrawer()" class="group relative flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-tr from-cyan-500 via-blue-600 to-fuchsia-600 shadow-2xl shadow-cyan-500/40 hover:scale-110 active:scale-95 transition-all border border-white/30">
+      <div class="absolute -inset-1 rounded-2xl bg-gradient-to-r from-cyan-400 to-fuchsia-500 opacity-70 blur-md group-hover:opacity-100 transition-opacity animate-pulse"></div>
+      <i class="fa-solid fa-robot text-white text-xl relative z-10"></i>
+      <span class="absolute -top-1 -right-1 px-1.5 py-0.5 rounded-full bg-emerald-500 text-[9px] font-bold text-white border border-slate-900">AI</span>
+    </button>
+  </div>
+
+  <!-- MAIN SCROLLABLE / LAYERED 3D EXPERIENCES -->
+  <main class="relative z-10 pointer-events-none pt-24 pb-32">
+    
+    <!-- ========================================== -->
+    <!-- SECTION 0: HERO UNIVERSE                   -->
+    <!-- ========================================== -->
+    <section id="sector-hero" class="min-h-screen max-w-7xl mx-auto px-4 md:px-8 flex flex-col justify-center items-center text-center relative pointer-events-auto">
+      
+      <div class="inline-flex items-center space-x-2 px-4 py-1.5 rounded-full glass-panel border border-cyan-500/30 text-xs font-mono text-cyan-300 mb-6 animate-pulse-glow">
+        <i class="fa-solid fa-sparkles text-cyan-400"></i>
+        <span>AI-POWERED EDUCATION & FUNDING ECOSYSTEM</span>
+        <span class="w-1.5 h-1.5 rounded-full bg-cyan-400"></span>
+        <span class="text-slate-400">WEBGL 3D SPATIAL ENGINE</span>
+      </div>
+
+      <h1 class="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-black tracking-tight leading-[1.05] max-w-5xl mb-6">
+        <span class="text-white">FUND YOUR EDUCATION.</span><br>
+        <span class="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-blue-400 via-fuchsia-400 to-amber-300 neon-text-glow">
+          LEARN. INTERN. BUILD. GROW.
+        </span>
+      </h1>
+
+      <p class="max-w-2xl text-slate-300 text-base md:text-xl font-normal leading-relaxed mb-10">
+        ScholarAI bridges high-ambition students with verified government scholarships, corporate grants, college fee escrow, interactive 12-week internships, and an AI-guided career progression graph.
+      </p>
+
+      <!-- Primary Action Buttons -->
+      <div class="flex flex-wrap items-center justify-center gap-4 w-full max-w-md">
+        <button onclick="flyToStation('funding')" class="flex-1 min-w-[160px] py-4 px-6 rounded-2xl bg-gradient-to-r from-cyan-500 via-blue-600 to-fuchsia-600 hover:from-cyan-400 hover:to-fuchsia-500 text-white font-bold text-sm tracking-wide shadow-xl shadow-cyan-500/25 transition-all transform hover:-translate-y-1 active:translate-y-0 flex items-center justify-center space-x-2">
+          <i class="fa-solid fa-compass"></i>
+          <span>Explore Opportunities</span>
+        </button>
+        <button onclick="flyToStation('aimatch')" class="flex-1 min-w-[160px] py-4 px-6 rounded-2xl glass-panel hover:bg-white/10 text-white font-bold text-sm border border-white/20 transition-all transform hover:-translate-y-1 flex items-center justify-center space-x-2">
+          <i class="fa-solid fa-brain text-cyan-400"></i>
+          <span>AI Eligibility Match</span>
+        </button>
+      </div>
+
+      <!-- Quick Platform Live Counter Metrics (3D Orbit Overlays) -->
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-16 w-full max-w-4xl">
+        <div class="glass-panel p-4 rounded-2xl border border-white/10 text-center">
+          <div class="text-2xl md:text-3xl font-black text-cyan-400 font-mono">₹48.6 Cr+</div>
+          <div class="text-xs text-slate-400 font-medium mt-1">Verified Aid Granted</div>
+        </div>
+        <div class="glass-panel p-4 rounded-2xl border border-white/10 text-center">
+          <div class="text-2xl md:text-3xl font-black text-fuchsia-400 font-mono">1,840+</div>
+          <div class="text-xs text-slate-400 font-medium mt-1">Active Scholarships</div>
+        </div>
+        <div class="glass-panel p-4 rounded-2xl border border-white/10 text-center">
+          <div class="text-2xl md:text-3xl font-black text-emerald-400 font-mono">420+</div>
+          <div class="text-xs text-slate-400 font-medium mt-1">Partner Universities</div>
+        </div>
+        <div class="glass-panel p-4 rounded-2xl border border-white/10 text-center">
+          <div class="text-2xl md:text-3xl font-black text-amber-400 font-mono">98.4%</div>
+          <div class="text-xs text-slate-400 font-medium mt-1">Deterministic AI Precision</div>
+        </div>
+      </div>
+
+      <!-- Scroll Indicator -->
+      <div class="mt-12 flex flex-col items-center opacity-70 animate-bounce cursor-pointer" onclick="flyToStation('funding')">
+        <span class="text-[11px] font-mono tracking-widest text-slate-400 uppercase">Fly into Funding Universe</span>
+        <i class="fa-solid fa-chevron-down text-cyan-400 mt-2"></i>
+      </div>
+    </section>
+
+    <!-- ========================================== -->
+    <!-- SECTION 1: 3D FUNDING UNIVERSE             -->
+    <!-- ========================================== -->
+    <section id="sector-funding" class="min-h-screen max-w-7xl mx-auto px-4 md:px-8 py-20 pointer-events-auto">
+      <div class="flex flex-col md:flex-row md:items-end justify-between mb-12">
+        <div>
+          <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-lg bg-cyan-500/10 border border-cyan-500/30 text-xs font-mono text-cyan-300 mb-2">
+            <i class="fa-solid fa-coins"></i>
+            <span>SECTOR 1: SPATIAL FUNDING MARKETPLACE</span>
+          </div>
+          <h2 class="text-3xl md:text-5xl font-extrabold text-white">Explore Funding Opportunities</h2>
+          <p class="text-slate-400 text-sm md:text-base mt-2 max-w-xl">
+            Live, verified grants, institutional endowments, corporate CSR aids, and government merit scholarships.
+          </p>
+        </div>
+
+        <!-- Filter Chips -->
+        <div class="flex flex-wrap gap-2 mt-4 md:mt-0">
+          <button onclick="filterFunding('all')" class="funding-filter-btn active px-3.5 py-1.5 rounded-xl bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 text-xs font-semibold">All Entities</button>
+          <button onclick="filterFunding('gov')" class="funding-filter-btn px-3.5 py-1.5 rounded-xl bg-slate-800/60 text-slate-400 hover:text-white border border-white/5 text-xs font-semibold">🏛 Government</button>
+          <button onclick="filterFunding('corp')" class="funding-filter-btn px-3.5 py-1.5 rounded-xl bg-slate-800/60 text-slate-400 hover:text-white border border-white/5 text-xs font-semibold">🏢 Corporate</button>
+          <button onclick="filterFunding('univ')" class="funding-filter-btn px-3.5 py-1.5 rounded-xl bg-slate-800/60 text-slate-400 hover:text-white border border-white/5 text-xs font-semibold">🏫 University</button>
+          <button onclick="filterFunding('trust')" class="funding-filter-btn px-3.5 py-1.5 rounded-xl bg-slate-800/60 text-slate-400 hover:text-white border border-white/5 text-xs font-semibold">🌐 Trust / NGO</button>
+        </div>
+      </div>
+
+      <!-- Interactive 3D Opportunity Cards Grid -->
+      <div id="funding-cards-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        
+        <!-- Card 1 -->
+        <div class="funding-card glass-panel p-6 rounded-2xl border border-white/10 glass-card-interactive relative group" data-category="gov">
+          <div class="flex items-center justify-between mb-4">
+            <span class="px-2.5 py-1 rounded-lg bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[11px] font-mono font-semibold flex items-center space-x-1">
+              <i class="fa-solid fa-circle-check"></i>
+              <span>Gov Verified</span>
+            </span>
+            <span class="text-xs font-mono text-slate-400"><i class="fa-regular fa-clock mr-1"></i> Ends: 30 Nov 2026</span>
+          </div>
+          <div class="flex items-center space-x-3 mb-4">
+            <div class="w-12 h-12 rounded-xl bg-blue-500/20 border border-blue-500/30 flex items-center justify-center text-blue-400 text-xl font-bold">
+              🏛
+            </div>
+            <div>
+              <h3 class="font-bold text-white text-lg group-hover:text-cyan-300 transition-colors">National STEM Innovation Grant</h3>
+              <p class="text-xs text-slate-400">Ministry of Education & Science</p>
+            </div>
+          </div>
+          <div class="space-y-2 mb-6 text-xs text-slate-300">
+            <div class="flex justify-between py-1 border-b border-white/5">
+              <span class="text-slate-400">Award Amount:</span>
+              <span class="font-mono font-bold text-emerald-400 text-sm">₹1,50,000 / Year</span>
+            </div>
+            <div class="flex justify-between py-1 border-b border-white/5">
+              <span class="text-slate-400">Eligible Branch:</span>
+              <span>B.Tech / B.E. / M.Sc</span>
+            </div>
+            <div class="flex justify-between py-1 border-b border-white/5">
+              <span class="text-slate-400">Academic Score:</span>
+              <span>CGPA &gt; 8.0 or 80%+</span>
+            </div>
+            <div class="flex justify-between py-1 border-b border-white/5">
+              <span class="text-slate-400">Annual Family Income:</span>
+              <span>&lt; ₹6,00,000 LPA</span>
+            </div>
+          </div>
+          <div class="flex items-center space-x-3">
+            <button onclick="openApplicationFlow('National STEM Innovation Grant', '₹1,50,000/yr', 'Gov Verified')" class="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-semibold text-xs transition-all shadow-md shadow-cyan-500/20">
+              Apply Now
+            </button>
+            <button onclick="inspectCardDetails('card1')" class="px-3 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 text-xs border border-white/10" title="Inspect 3D Data">
+              <i class="fa-solid fa-eye"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Card 2 -->
+        <div class="funding-card glass-panel p-6 rounded-2xl border border-white/10 glass-card-interactive relative group" data-category="corp">
+          <div class="flex items-center justify-between mb-4">
+            <span class="px-2.5 py-1 rounded-lg bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 text-[11px] font-mono font-semibold flex items-center space-x-1">
+              <i class="fa-solid fa-circle-check"></i>
+              <span>Corporate CSR</span>
+            </span>
+            <span class="text-xs font-mono text-slate-400"><i class="fa-regular fa-clock mr-1"></i> Ends: 15 Dec 2026</span>
+          </div>
+          <div class="flex items-center space-x-3 mb-4">
+            <div class="w-12 h-12 rounded-xl bg-fuchsia-500/20 border border-fuchsia-500/30 flex items-center justify-center text-fuchsia-400 text-xl font-bold">
+              🏢
+            </div>
+            <div>
+              <h3 class="font-bold text-white text-lg group-hover:text-fuchsia-300 transition-colors">Future Tech Leaders Fellowship</h3>
+              <p class="text-xs text-slate-400">Nexus Global Cloud Foundation</p>
+            </div>
+          </div>
+          <div class="space-y-2 mb-6 text-xs text-slate-300">
+            <div class="flex justify-between py-1 border-b border-white/5">
+              <span class="text-slate-400">Award Amount:</span>
+              <span class="font-mono font-bold text-fuchsia-400 text-sm">₹2,00,000 + MacBook</span>
+            </div>
+            <div class="flex justify-between py-1 border-b border-white/5">
+              <span class="text-slate-400">Eligible Branch:</span>
+              <span>AI / Data / CSE / ECE</span>
+            </div>
+            <div class="flex justify-between py-1 border-b border-white/5">
+              <span class="text-slate-400">Academic Score:</span>
+              <span>CGPA &gt; 7.5</span>
+            </div>
+            <div class="flex justify-between py-1 border-b border-white/5">
+              <span class="text-slate-400">Includes:</span>
+              <span>Guaranteed Summer Internship</span>
+            </div>
+          </div>
+          <div class="flex items-center space-x-3">
+            <button onclick="openApplicationFlow('Future Tech Leaders Fellowship', '₹2,00,000 + Hardware', 'Corporate CSR')" class="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-fuchsia-600 to-pink-600 hover:from-fuchsia-500 hover:to-pink-500 text-white font-semibold text-xs transition-all shadow-md shadow-fuchsia-500/20">
+              Apply Now
+            </button>
+            <button onclick="inspectCardDetails('card2')" class="px-3 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 text-xs border border-white/10">
+              <i class="fa-solid fa-eye"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Card 3 -->
+        <div class="funding-card glass-panel p-6 rounded-2xl border border-white/10 glass-card-interactive relative group" data-category="trust">
+          <div class="flex items-center justify-between mb-4">
+            <span class="px-2.5 py-1 rounded-lg bg-amber-500/10 text-amber-400 border border-amber-500/20 text-[11px] font-mono font-semibold flex items-center space-x-1">
+              <i class="fa-solid fa-circle-check"></i>
+              <span>Trust Verified</span>
+            </span>
+            <span class="text-xs font-mono text-slate-400"><i class="fa-regular fa-clock mr-1"></i> Ends: 20 Jan 2027</span>
+          </div>
+          <div class="flex items-center space-x-3 mb-4">
+            <div class="w-12 h-12 rounded-xl bg-amber-500/20 border border-amber-500/30 flex items-center justify-center text-amber-400 text-xl font-bold">
+              🌐
+            </div>
+            <div>
+              <h3 class="font-bold text-white text-lg group-hover:text-amber-300 transition-colors">Vidya Jyoti Women In STEM Trust</h3>
+              <p class="text-xs text-slate-400">Kalyani Philanthropic Trust</p>
+            </div>
+          </div>
+          <div class="space-y-2 mb-6 text-xs text-slate-300">
+            <div class="flex justify-between py-1 border-b border-white/5">
+              <span class="text-slate-400">Award Amount:</span>
+              <span class="font-mono font-bold text-amber-400 text-sm">₹80,000 / Year</span>
+            </div>
+            <div class="flex justify-between py-1 border-b border-white/5">
+              <span class="text-slate-400">Target Group:</span>
+              <span>Female Engineering Scholars</span>
+            </div>
+            <div class="flex justify-between py-1 border-b border-white/5">
+              <span class="text-slate-400">Coverage:</span>
+              <span>100% Tuition Fees Escrow</span>
+            </div>
+            <div class="flex justify-between py-1 border-b border-white/5">
+              <span class="text-slate-400">Annual Family Income:</span>
+              <span>&lt; ₹4,50,000 LPA</span>
+            </div>
+          </div>
+          <div class="flex items-center space-x-3">
+            <button onclick="openApplicationFlow('Vidya Jyoti Women In STEM Trust', '₹80,000/yr', 'Trust Verified')" class="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-400 hover:to-orange-500 text-white font-semibold text-xs transition-all shadow-md shadow-amber-500/20">
+              Apply Now
+            </button>
+            <button onclick="inspectCardDetails('card3')" class="px-3 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 text-xs border border-white/10">
+              <i class="fa-solid fa-eye"></i>
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Action callout -->
+      <div class="mt-8 flex justify-center">
+        <button onclick="toggleModal('create-funding-modal')" class="px-5 py-3 rounded-xl bg-white/5 hover:bg-white/10 border border-white/15 text-xs font-semibold text-cyan-300 flex items-center space-x-2">
+          <i class="fa-solid fa-plus-circle"></i>
+          <span>Are you an Organization or Foundation? Create a Funding Program</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- ========================================== -->
+    <!-- SECTION 2: AI SCHOLARSHIP MATCHING CORE    -->
+    <!-- ========================================== -->
+    <section id="sector-aimatch" class="min-h-screen max-w-7xl mx-auto px-4 md:px-8 py-20 pointer-events-auto">
+      <div class="text-center max-w-3xl mx-auto mb-12">
+        <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-lg bg-fuchsia-500/10 border border-fuchsia-500/30 text-xs font-mono text-fuchsia-300 mb-3">
+          <i class="fa-solid fa-brain"></i>
+          <span>SECTOR 2: DETERMINISTIC NEURAL MATCHING</span>
+        </div>
+        <h2 class="text-3xl md:text-5xl font-black text-white">Meet Your AI Funding Assistant</h2>
+        <p class="text-slate-300 text-sm md:text-base mt-2">
+          Instead of opaque algorithms, ScholarAI computes deterministic constraints, scores academic prerequisites, and explains the explicit breakdown behind every recommendation.
+        </p>
+      </div>
+
+      <!-- 3D AI Analysis Flow Board -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+        
+        <!-- Left: Student Input Profile Node -->
+        <div class="lg:col-span-4 glass-panel p-6 rounded-2xl border border-white/10 space-y-4">
+          <div class="flex items-center space-x-3 border-b border-white/10 pb-4">
+            <div class="w-12 h-12 rounded-full bg-gradient-to-tr from-cyan-500 to-blue-600 flex items-center justify-center font-bold text-lg text-white">
+              AK
+            </div>
+            <div>
+              <div class="font-bold text-white text-base">Aryan Kulkarni</div>
+              <div class="text-xs text-slate-400">B.Tech Computer Science • Year 3</div>
+            </div>
+          </div>
+
+          <div class="space-y-3 text-xs">
+            <div class="flex justify-between">
+              <span class="text-slate-400">College:</span>
+              <span class="text-slate-200 font-medium">IIT Hyderabad (Affiliated)</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-slate-400">Current CGPA:</span>
+              <span class="text-cyan-400 font-mono font-bold">8.82 / 10.0</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-slate-400">Annual Family Income:</span>
+              <span class="text-slate-200 font-mono">₹4,20,000 LPA</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-slate-400">Domicile:</span>
+              <span class="text-slate-200">Telangana, India</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-slate-400">Uploaded Documents:</span>
+              <span class="text-emerald-400 font-medium">Marksheets, Aadhar, EWS</span>
+            </div>
+          </div>
+
+          <div class="pt-2">
+            <button onclick="recalculateAIMatch()" class="w-full py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-500 hover:to-cyan-400 text-white font-semibold text-xs transition-all shadow-md">
+              <i class="fa-solid fa-arrows-rotate mr-1.5"></i> Re-run Deterministic AI Engine
+            </button>
+          </div>
+        </div>
+
+        <!-- Center: 3D AI Neural Match Card -->
+        <div class="lg:col-span-8 glass-panel p-6 md:p-8 rounded-3xl border border-cyan-500/40 relative overflow-hidden">
+          
+          <!-- Background Glow -->
+          <div class="absolute -top-24 -right-24 w-72 h-72 rounded-full bg-cyan-500/10 blur-3xl pointer-events-none"></div>
+
+          <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6 border-b border-white/10 pb-6">
+            <div>
+              <div class="text-xs font-mono text-cyan-400 uppercase tracking-widest">Matched Target</div>
+              <h3 class="text-xl md:text-2xl font-black text-white mt-1">National STEM Innovation Grant (2026-27)</h3>
+              <p class="text-xs text-slate-400 mt-0.5">Ministry of Education • ₹1,50,000 / Year Coverage</p>
+            </div>
+
+            <!-- Score Pill -->
+            <div class="flex items-center space-x-3 bg-emerald-500/10 border border-emerald-500/30 px-4 py-2 rounded-2xl">
+              <div class="text-3xl md:text-4xl font-black text-emerald-400 font-mono" id="ai-match-score">94%</div>
+              <div class="text-left leading-tight">
+                <div class="text-xs font-bold text-white">STRONG</div>
+                <div class="text-[10px] text-emerald-300 font-mono">MATCH SCORE</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Deterministic Reasoning List -->
+          <div class="space-y-3 mb-6">
+            <div class="text-xs font-mono text-slate-400 uppercase tracking-wider mb-2">Deterministic Verification Rules</div>
+            
+            <div class="flex items-start space-x-3 p-3 rounded-xl bg-emerald-500/5 border border-emerald-500/20 text-xs">
+              <i class="fa-solid fa-circle-check text-emerald-400 mt-0.5 text-sm"></i>
+              <div>
+                <span class="font-semibold text-emerald-300">Course &amp; Major Matches:</span>
+                <span class="text-slate-300 ml-1">Enrolled in eligible STEM disciplines (Computer Science B.Tech verified).</span>
+              </div>
+            </div>
+
+            <div class="flex items-start space-x-3 p-3 rounded-xl bg-emerald-500/5 border border-emerald-500/20 text-xs">
+              <i class="fa-solid fa-circle-check text-emerald-400 mt-0.5 text-sm"></i>
+              <div>
+                <span class="font-semibold text-emerald-300">Academic Requirement Satisfied:</span>
+                <span class="text-slate-300 ml-1">Current CGPA 8.82 exceeds minimum required threshold of 8.00.</span>
+              </div>
+            </div>
+
+            <div class="flex items-start space-x-3 p-3 rounded-xl bg-emerald-500/5 border border-emerald-500/20 text-xs">
+              <i class="fa-solid fa-circle-check text-emerald-400 mt-0.5 text-sm"></i>
+              <div>
+                <span class="font-semibold text-emerald-300">Income Requirement Compliant:</span>
+                <span class="text-slate-300 ml-1">Verified family income (₹4.20 LPA) is well within ₹6.00 LPA ceiling.</span>
+              </div>
+            </div>
+
+            <div class="flex items-start space-x-3 p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 text-xs">
+              <i class="fa-solid fa-triangle-exclamation text-amber-400 mt-0.5 text-sm"></i>
+              <div>
+                <span class="font-semibold text-amber-300">Action Required — Missing Document:</span>
+                <span class="text-slate-200 ml-1">Annual Income Certificate for FY 2025-26 expires in 12 days. Please upload refreshed renewal.</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="flex flex-wrap items-center justify-between gap-4 pt-2">
+            <div class="flex items-center space-x-2 text-xs text-slate-400">
+              <i class="fa-solid fa-lock text-cyan-400"></i>
+              <span>Escrow verification protocol active</span>
+            </div>
+            <button onclick="openApplicationFlow('National STEM Innovation Grant', '₹1,50,000/yr', 'Gov Verified')" class="px-6 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-cyan-500 hover:from-emerald-400 hover:to-cyan-400 text-slate-950 font-bold text-xs shadow-lg shadow-emerald-500/20">
+              Proceed with 94% Match Application
+            </button>
+          </div>
+
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ========================================== -->
+    <!-- SECTION 3: 3D STUDENT DASHBOARD & CAREER   -->
+    <!-- ========================================== -->
+    <section id="sector-career" class="min-h-screen max-w-7xl mx-auto px-4 md:px-8 py-20 pointer-events-auto">
+      <div class="flex flex-col md:flex-row md:items-end justify-between mb-12">
+        <div>
+          <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-lg bg-blue-500/10 border border-blue-500/30 text-xs font-mono text-blue-300 mb-2">
+            <i class="fa-solid fa-diagram-project"></i>
+            <span>SECTOR 3: 3D CAREER PROGRESSION GRAPH</span>
+          </div>
+          <h2 class="text-3xl md:text-5xl font-extrabold text-white">Student Career Command Center</h2>
+          <p class="text-slate-400 text-sm md:text-base mt-2">
+            Dynamic pipeline journey: Education &rarr; Funding &rarr; Learning &rarr; Internship &rarr; Project &rarr; Certify &rarr; Career.
+          </p>
+        </div>
+      </div>
+
+      <!-- 3D Pipeline Progression Bar -->
+      <div class="glass-panel p-6 rounded-3xl border border-white/10 mb-10 overflow-x-auto">
+        <div class="min-w-[700px] flex items-center justify-between relative">
+          <!-- Connecting Line -->
+          <div class="absolute left-6 right-6 top-1/2 -translate-y-1/2 h-1 bg-gradient-to-r from-cyan-500 via-blue-500 via-fuchsia-500 to-slate-700 z-0"></div>
+
+          <!-- Step 1: Education -->
+          <div class="relative z-10 flex flex-col items-center cursor-pointer group" onclick="highlightGraphStep(1)">
+            <div class="w-12 h-12 rounded-2xl bg-cyan-500 text-slate-950 font-bold flex items-center justify-center text-lg shadow-lg shadow-cyan-500/30 group-hover:scale-110 transition-transform">
+              <i class="fa-solid fa-graduation-cap"></i>
+            </div>
+            <span class="text-xs font-bold text-cyan-300 mt-2">Education</span>
+            <span class="text-[10px] text-emerald-400 font-mono">Completed</span>
+          </div>
+
+          <!-- Step 2: Funding -->
+          <div class="relative z-10 flex flex-col items-center cursor-pointer group" onclick="highlightGraphStep(2)">
+            <div class="w-12 h-12 rounded-2xl bg-blue-500 text-white font-bold flex items-center justify-center text-lg shadow-lg shadow-blue-500/30 group-hover:scale-110 transition-transform">
+              <i class="fa-solid fa-hand-holding-dollar"></i>
+            </div>
+            <span class="text-xs font-bold text-blue-300 mt-2">Funding</span>
+            <span class="text-[10px] text-emerald-400 font-mono">Approved</span>
+          </div>
+
+          <!-- Step 3: Learning -->
+          <div class="relative z-10 flex flex-col items-center cursor-pointer group" onclick="highlightGraphStep(3)">
+            <div class="w-12 h-12 rounded-2xl bg-fuchsia-600 text-white font-bold flex items-center justify-center text-lg shadow-lg shadow-fuchsia-500/30 group-hover:scale-110 transition-transform">
+              <i class="fa-solid fa-book-open"></i>
+            </div>
+            <span class="text-xs font-bold text-fuchsia-300 mt-2">Learning</span>
+            <span class="text-[10px] text-cyan-300 font-mono">Week 8 / 12</span>
+          </div>
+
+          <!-- Step 4: Internship -->
+          <div class="relative z-10 flex flex-col items-center cursor-pointer group" onclick="highlightGraphStep(4)">
+            <div class="w-12 h-12 rounded-2xl bg-indigo-600 text-white font-bold flex items-center justify-center text-lg shadow-lg shadow-indigo-500/30 group-hover:scale-110 transition-transform ring-2 ring-cyan-400 animate-pulse">
+              <i class="fa-solid fa-briefcase"></i>
+            </div>
+            <span class="text-xs font-bold text-indigo-300 mt-2">Internship</span>
+            <span class="text-[10px] text-amber-300 font-mono">In Progress</span>
+          </div>
+
+          <!-- Step 5: Project -->
+          <div class="relative z-10 flex flex-col items-center cursor-pointer group" onclick="highlightGraphStep(5)">
+            <div class="w-12 h-12 rounded-2xl bg-slate-800 text-slate-400 font-bold flex items-center justify-center text-lg border border-white/10 group-hover:scale-110 transition-transform">
+              <i class="fa-solid fa-laptop-code"></i>
+            </div>
+            <span class="text-xs font-bold text-slate-400 mt-2">Project</span>
+            <span class="text-[10px] text-slate-500 font-mono">Pending</span>
+          </div>
+
+          <!-- Step 6: Certify -->
+          <div class="relative z-10 flex flex-col items-center cursor-pointer group" onclick="highlightGraphStep(6)">
+            <div class="w-12 h-12 rounded-2xl bg-slate-800 text-slate-400 font-bold flex items-center justify-center text-lg border border-white/10 group-hover:scale-110 transition-transform">
+              <i class="fa-solid fa-award"></i>
+            </div>
+            <span class="text-xs font-bold text-slate-400 mt-2">Certify</span>
+            <span class="text-[10px] text-slate-500 font-mono">Locked</span>
+          </div>
+
+          <!-- Step 7: Career -->
+          <div class="relative z-10 flex flex-col items-center cursor-pointer group" onclick="highlightGraphStep(7)">
+            <div class="w-12 h-12 rounded-2xl bg-slate-800 text-slate-400 font-bold flex items-center justify-center text-lg border border-white/10 group-hover:scale-110 transition-transform">
+              <i class="fa-solid fa-rocket"></i>
+            </div>
+            <span class="text-xs font-bold text-slate-400 mt-2">Career</span>
+            <span class="text-[10px] text-slate-500 font-mono">Target: 2027</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Dashboard Interactive Metric Cards -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <!-- Live Application Status Card -->
+        <div class="glass-panel p-6 rounded-2xl border border-white/10">
+          <div class="flex items-center justify-between mb-4">
+            <h4 class="font-bold text-white text-base">Active Applications</h4>
+            <span class="px-2 py-0.5 rounded bg-blue-500/20 text-blue-300 text-xs font-mono">2 Live</span>
+          </div>
+          <div class="space-y-3">
+            <div class="p-3 rounded-xl bg-white/5 border border-white/5 flex items-center justify-between">
+              <div>
+                <div class="text-xs font-bold text-white">National STEM Grant</div>
+                <div class="text-[10px] text-slate-400">Stage: Document Verification</div>
+              </div>
+              <span class="text-[11px] px-2 py-1 rounded bg-amber-500/20 text-amber-300 font-mono">Under Review</span>
+            </div>
+            <div class="p-3 rounded-xl bg-white/5 border border-white/5 flex items-center justify-between">
+              <div>
+                <div class="text-xs font-bold text-white">Full-Stack Cloud Internship</div>
+                <div class="text-[10px] text-slate-400">Nexus Cloud Labs</div>
+              </div>
+              <span class="text-[11px] px-2 py-1 rounded bg-emerald-500/20 text-emerald-300 font-mono">Shortlisted</span>
+            </div>
+          </div>
+          <button onclick="toggleModal('search-modal')" class="w-full mt-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-xs text-slate-300 font-medium border border-white/10 transition-colors">
+            + Search More Openings
+          </button>
+        </div>
+
+        <!-- 3D Skill Graph Readiness -->
+        <div class="glass-panel p-6 rounded-2xl border border-white/10">
+          <div class="flex items-center justify-between mb-4">
+            <h4 class="font-bold text-white text-base">AI Career Graph Index</h4>
+            <span class="text-cyan-400 font-mono font-bold text-sm">88 / 100</span>
+          </div>
+          <div class="space-y-3 text-xs">
+            <div>
+              <div class="flex justify-between mb-1">
+                <span class="text-slate-400">Cloud Architecture &amp; APIs</span>
+                <span class="text-cyan-300 font-mono">92%</span>
+              </div>
+              <div class="w-full h-1.5 bg-slate-800 rounded-full overflow-hidden">
+                <div class="w-[92%] h-full bg-cyan-400 rounded-full"></div>
+              </div>
+            </div>
+            <div>
+              <div class="flex justify-between mb-1">
+                <span class="text-slate-400">Database &amp; ACID Transactions</span>
+                <span class="text-blue-300 font-mono">85%</span>
+              </div>
+              <div class="w-full h-1.5 bg-slate-800 rounded-full overflow-hidden">
+                <div class="w-[85%] h-full bg-blue-500 rounded-full"></div>
+              </div>
+            </div>
+            <div>
+              <div class="flex justify-between mb-1">
+                <span class="text-slate-400">System Design &amp; WebGL</span>
+                <span class="text-fuchsia-300 font-mono">74%</span>
+              </div>
+              <div class="w-full h-1.5 bg-slate-800 rounded-full overflow-hidden">
+                <div class="w-[74%] h-full bg-fuchsia-500 rounded-full"></div>
+              </div>
+            </div>
+          </div>
+          <button onclick="askAIAssistant('What skills should I improve for Cloud engineering?')" class="w-full mt-5 py-2 rounded-xl bg-cyan-500/10 hover:bg-cyan-500/20 text-xs text-cyan-300 font-medium border border-cyan-500/30 transition-colors flex items-center justify-center space-x-1.5">
+            <i class="fa-solid fa-wand-magic-sparkles"></i>
+            <span>AI Skill Recommendation</span>
+          </button>
+        </div>
+
+        <!-- Escrow Fee Balance Protection Widget -->
+        <div class="glass-panel p-6 rounded-2xl border border-white/10 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between mb-2">
+              <h4 class="font-bold text-white text-base">Direct College Fee Protection</h4>
+              <i class="fa-solid fa-shield-check text-emerald-400"></i>
+            </div>
+            <p class="text-xs text-slate-400 mb-4">Direct university fee escrow clearance tracking.</p>
+            <div class="p-3 rounded-xl bg-slate-900/60 border border-white/5 space-y-2 text-xs">
+              <div class="flex justify-between">
+                <span class="text-slate-400">Annual Tuition:</span>
+                <span class="font-mono text-white">₹1,20,000</span>
+              </div>
+              <div class="flex justify-between text-emerald-400 font-semibold">
+                <span>Scholarship Awarded:</span>
+                <span class="font-mono">- ₹50,000</span>
+              </div>
+              <div class="h-[1px] bg-white/10 my-1"></div>
+              <div class="flex justify-between text-amber-300 font-bold">
+                <span>Remaining Payable:</span>
+                <span class="font-mono text-sm">₹70,000</span>
+              </div>
+            </div>
+          </div>
+          <div class="text-[10px] text-slate-400 mt-4 flex items-center space-x-1">
+            <i class="fa-solid fa-circle-info text-blue-400"></i>
+            <span>Funds are marked committed until final ledger settlement.</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================== -->
+    <!-- SECTION 4: COMMAND CENTERS (PORTALS)       -->
+    <!-- ========================================== -->
+    <section id="sector-portals" class="min-h-screen max-w-7xl mx-auto px-4 md:px-8 py-20 pointer-events-auto">
+      <div class="flex flex-col md:flex-row md:items-end justify-between mb-8">
+        <div>
+          <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-lg bg-amber-500/10 border border-amber-500/30 text-xs font-mono text-amber-300 mb-2">
+            <i class="fa-solid fa-terminal"></i>
+            <span>SECTOR 4: MULTI-PORTAL ROLE WORKSPACE</span>
+          </div>
+          <h2 class="text-3xl md:text-5xl font-black text-white" id="portal-heading">College Command Center</h2>
+          <p class="text-slate-400 text-sm md:text-base mt-2" id="portal-subheading">
+            University department roster, student fee ledger protection, and funding reconciliation.
+          </p>
+        </div>
+
+        <!-- Portal Role Selector Tabs -->
+        <div class="flex items-center space-x-2 bg-slate-900/80 p-1.5 rounded-2xl border border-white/10 mt-4 md:mt-0 text-xs">
+          <button onclick="switchRole('College')" id="tab-role-College" class="px-3 py-2 rounded-xl bg-cyan-500 text-slate-950 font-bold transition-all">College Portal</button>
+          <button onclick="switchRole('Organization')" id="tab-role-Organization" class="px-3 py-2 rounded-xl text-slate-400 hover:text-white transition-all">Organization</button>
+          <button onclick="switchRole('SuperAdmin')" id="tab-role-SuperAdmin" class="px-3 py-2 rounded-xl text-slate-400 hover:text-white transition-all">Super Admin</button>
+        </div>
+      </div>
+
+      <!-- PORTAL CONTENT VIEWS -->
+      <!-- VIEW 1: COLLEGE COMMAND CENTER -->
+      <div id="portal-view-college" class="space-y-6">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div class="glass-panel p-5 rounded-2xl border border-white/10">
+            <div class="text-slate-400 text-xs font-medium">Total Registered Scholars</div>
+            <div class="text-3xl font-black text-white font-mono mt-1">2,480</div>
+            <div class="text-[11px] text-emerald-400 mt-1"><i class="fa-solid fa-arrow-up"></i> +12% this semester</div>
+          </div>
+          <div class="glass-panel p-5 rounded-2xl border border-white/10">
+            <div class="text-slate-400 text-xs font-medium">Departments Monitored</div>
+            <div class="text-3xl font-black text-cyan-400 font-mono mt-1">8 Faculties</div>
+            <div class="text-[11px] text-slate-400 mt-1">Engineering, Science, Arts</div>
+          </div>
+          <div class="glass-panel p-5 rounded-2xl border border-white/10">
+            <div class="text-slate-400 text-xs font-medium">Committed Escrow Aid</div>
+            <div class="text-3xl font-black text-emerald-400 font-mono mt-1">₹3.82 Cr</div>
+            <div class="text-[11px] text-emerald-400 mt-1">100% Verified by Gov/CSR</div>
+          </div>
+          <div class="glass-panel p-5 rounded-2xl border border-white/10">
+            <div class="text-slate-400 text-xs font-medium">Pending Verifications</div>
+            <div class="text-3xl font-black text-amber-400 font-mono mt-1">18 Students</div>
+            <div class="text-[11px] text-amber-300 mt-1">Document mismatch alerts</div>
+          </div>
+        </div>
+
+        <!-- 3D Fee-Support Reconciliation Engine -->
+        <div class="glass-panel p-6 md:p-8 rounded-3xl border border-white/10 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+          <div class="lg:col-span-5">
+            <span class="text-xs font-mono text-cyan-400 uppercase tracking-widest">3D Ledger Visualizer</span>
+            <h3 class="text-2xl font-black text-white mt-1">Institutional Fee Support Breakup</h3>
+            <p class="text-slate-300 text-xs mt-2 leading-relaxed">
+              ScholarAI enforces strict ledger integrity. No student is burdened or falsely credited until bank clearing hashes match institutional accounts.
+            </p>
+            
+            <div class="mt-6 space-y-3">
+              <div class="flex items-center justify-between p-3 rounded-xl bg-white/5 border border-white/5 text-xs">
+                <span class="text-slate-300"><i class="fa-solid fa-receipt text-blue-400 mr-2"></i> Annual Standard Fee:</span>
+                <span class="font-mono font-bold text-white">₹1,20,000</span>
+              </div>
+              <div class="flex items-center justify-between p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-xs">
+                <span class="text-emerald-300"><i class="fa-solid fa-hand-holding-dollar text-emerald-400 mr-2"></i> Scholarship Credited:</span>
+                <span class="font-mono font-bold text-emerald-400">- ₹50,000</span>
+              </div>
+              <div class="flex items-center justify-between p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 text-xs">
+                <span class="text-amber-300"><i class="fa-solid fa-hourglass-half text-amber-400 mr-2"></i> Remaining Student Liability:</span>
+                <span class="font-mono font-bold text-amber-300">₹70,000</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Circular 3D Proportion Gauge -->
+          <div class="lg:col-span-7 flex flex-col items-center justify-center p-6 bg-slate-950/40 rounded-2xl border border-white/5">
+            <div class="relative w-48 h-48 flex items-center justify-center">
+              <svg class="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
+                <circle cx="50" cy="50" r="40" stroke="rgba(255,255,255,0.1)" stroke-width="12" fill="transparent"/>
+                <!-- Scholarship Portion (41.6%) -->
+                <circle cx="50" cy="50" r="40" stroke="#10B981" stroke-width="12" stroke-dasharray="251.2" stroke-dashoffset="146.7" fill="transparent" class="transition-all duration-1000"/>
+                <!-- Remaining Portion -->
+                <circle cx="50" cy="50" r="40" stroke="#F59E0B" stroke-width="12" stroke-dasharray="251.2" stroke-dashoffset="104.5" fill="transparent" stroke-linecap="round"/>
+              </svg>
+              <div class="absolute inset-0 flex flex-col items-center justify-center text-center">
+                <span class="text-xs text-slate-400 font-mono">COVERAGE</span>
+                <span class="text-2xl font-black text-white font-mono">41.6%</span>
+                <span class="text-[10px] text-emerald-400">AID APPLIED</span>
+              </div>
+            </div>
+            <div class="flex items-center space-x-6 mt-4 text-xs font-mono">
+              <div class="flex items-center space-x-2">
+                <div class="w-3 h-3 rounded-full bg-emerald-500"></div>
+                <span class="text-slate-300">Awarded (₹50k)</span>
+              </div>
+              <div class="flex items-center space-x-2">
+                <div class="w-3 h-3 rounded-full bg-amber-500"></div>
+                <span class="text-slate-300">Remaining (₹70k)</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Student Roster Table -->
+        <div class="glass-panel p-6 rounded-3xl border border-white/10">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
+            <h4 class="font-bold text-white text-base">Department Cohort Verifications</h4>
+            <div class="flex items-center space-x-2">
+              <button onclick="bulkImportDemo()" class="px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-xs font-semibold text-slate-200 border border-white/10">
+                <i class="fa-solid fa-file-import mr-1"></i> Bulk Import CSV
+              </button>
+              <button class="px-3 py-1.5 rounded-xl bg-cyan-500/20 hover:bg-cyan-500/30 text-xs font-semibold text-cyan-300 border border-cyan-500/30">
+                <i class="fa-solid fa-plus mr-1"></i> Add Student
+              </button>
+            </div>
+          </div>
+
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs">
+              <thead class="border-b border-white/10 text-slate-400 font-mono uppercase text-[10px]">
+                <tr>
+                  <th class="py-3 px-3">Student Name</th>
+                  <th class="py-3 px-3">Department</th>
+                  <th class="py-3 px-3">CGPA</th>
+                  <th class="py-3 px-3">Matched Scholarship</th>
+                  <th class="py-3 px-3">Status</th>
+                  <th class="py-3 px-3 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-white/5 text-slate-300">
+                <tr>
+                  <td class="py-3 px-3 font-medium text-white flex items-center space-x-2">
+                    <span class="w-6 h-6 rounded-full bg-cyan-500/20 text-cyan-400 flex items-center justify-center font-bold text-[10px]">AK</span>
+                    <span>Aryan Kulkarni</span>
+                  </td>
+                  <td class="py-3 px-3">Computer Science</td>
+                  <td class="py-3 px-3 font-mono text-cyan-300 font-bold">8.82</td>
+                  <td class="py-3 px-3">National STEM Grant</td>
+                  <td class="py-3 px-3"><span class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 text-[10px] font-mono">VERIFIED</span></td>
+                  <td class="py-3 px-3 text-right">
+                    <button class="text-cyan-400 hover:text-cyan-300 mr-2 font-mono">Inspect</button>
+                  </td>
+                </tr>
+                <tr>
+                  <td class="py-3 px-3 font-medium text-white flex items-center space-x-2">
+                    <span class="w-6 h-6 rounded-full bg-fuchsia-500/20 text-fuchsia-400 flex items-center justify-center font-bold text-[10px]">SP</span>
+                    <span>Sneha Patel</span>
+                  </td>
+                  <td class="py-3 px-3">Electronics &amp; Comm.</td>
+                  <td class="py-3 px-3 font-mono text-cyan-300 font-bold">9.14</td>
+                  <td class="py-3 px-3">Women in STEM Trust</td>
+                  <td class="py-3 px-3"><span class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 text-[10px] font-mono">APPROVED</span></td>
+                  <td class="py-3 px-3 text-right">
+                    <button class="text-cyan-400 hover:text-cyan-300 mr-2 font-mono">Inspect</button>
+                  </td>
+                </tr>
+                <tr>
+                  <td class="py-3 px-3 font-medium text-white flex items-center space-x-2">
+                    <span class="w-6 h-6 rounded-full bg-amber-500/20 text-amber-400 flex items-center justify-center font-bold text-[10px]">RV</span>
+                    <span>Rohan Verma</span>
+                  </td>
+                  <td class="py-3 px-3">Mechanical Engg.</td>
+                  <td class="py-3 px-3 font-mono text-cyan-300 font-bold">7.40</td>
+                  <td class="py-3 px-3">Future Tech Leaders</td>
+                  <td class="py-3 px-3"><span class="px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 text-[10px] font-mono">CORRECTION REQ</span></td>
+                  <td class="py-3 px-3 text-right">
+                    <button class="text-amber-400 hover:text-amber-300 mr-2 font-mono">Review</button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- VIEW 2: ORGANIZATION PORTAL (Hidden by default) -->
+      <div id="portal-view-org" class="hidden space-y-6">
+        <div class="glass-panel p-6 rounded-3xl border border-white/10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+          <div>
+            <span class="text-xs font-mono text-fuchsia-400 uppercase tracking-widest">CSR &amp; Endowment Hub</span>
+            <h3 class="text-2xl font-black text-white mt-1">Create &amp; Manage Funding Programs</h3>
+            <p class="text-slate-300 text-xs mt-1 max-w-xl">
+              Launch corporate scholarships, setup eligibility criteria rules, deposit escrow allocations, and review shortlisted applicants.
+            </p>
+          </div>
+          <button onclick="toggleModal('create-funding-modal')" class="px-6 py-3 rounded-2xl bg-gradient-to-r from-fuchsia-600 to-pink-600 hover:from-fuchsia-500 hover:to-pink-500 text-white font-bold text-xs shadow-lg shadow-fuchsia-500/30 flex items-center space-x-2 self-start md:self-auto">
+            <i class="fa-solid fa-plus-circle"></i>
+            <span>Create New Funding Program</span>
+          </button>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div class="glass-panel p-6 rounded-2xl border border-white/10">
+            <div class="text-slate-400 text-xs">Total Disbursed Budget</div>
+            <div class="text-3xl font-black text-white font-mono mt-1">₹1,40,00,000</div>
+            <div class="text-[11px] text-slate-400 mt-2">Active FY 2026-2027 Allocation</div>
+          </div>
+          <div class="glass-panel p-6 rounded-2xl border border-white/10">
+            <div class="text-slate-400 text-xs">Applicants Received</div>
+            <div class="text-3xl font-black text-cyan-400 font-mono mt-1">1,942</div>
+            <div class="text-[11px] text-cyan-300 mt-2">94% auto-verified by AI rules</div>
+          </div>
+          <div class="glass-panel p-6 rounded-2xl border border-white/10">
+            <div class="text-slate-400 text-xs">Scholars Shortlisted</div>
+            <div class="text-3xl font-black text-emerald-400 font-mono mt-1">160</div>
+            <div class="text-[11px] text-emerald-400 mt-2">Ready for mentor interview</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- VIEW 3: SUPER ADMIN PORTAL (Hidden by default) -->
+      <div id="portal-view-admin" class="hidden space-y-6">
+        <div class="glass-panel p-6 rounded-3xl border border-amber-500/30 flex flex-col md:flex-row md:items-center justify-between gap-6">
+          <div>
+            <div class="inline-flex items-center space-x-2 px-2.5 py-0.5 rounded bg-amber-500/20 text-amber-300 text-[10px] font-mono mb-2">
+              <i class="fa-solid fa-shield-halved"></i>
+              <span>SUPER ADMIN PLATFORM ESCROW GOVERNANCE</span>
+            </div>
+            <h3 class="text-2xl font-black text-white">System Governance &amp; Entity Verifications</h3>
+            <p class="text-slate-300 text-xs mt-1">
+              Verify legal registration documents for Colleges, NGOs, and Corporates before opportunities are published publicly.
+            </p>
+          </div>
+          <div class="flex items-center space-x-2">
+            <button onclick="simulateVerificationApproval()" class="px-4 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs shadow-md">
+              <i class="fa-solid fa-check-double mr-1"></i> Verify Pending Entities
+            </button>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div class="glass-panel p-5 rounded-2xl border border-white/10">
+            <div class="text-xs text-slate-400">Total Ecosystem Value</div>
+            <div class="text-2xl font-black text-white font-mono mt-1">₹48,62,40,000</div>
+            <div class="text-[10px] text-emerald-400 font-mono mt-1">ACID Ledger Synced</div>
+          </div>
+          <div class="glass-panel p-5 rounded-2xl border border-white/10">
+            <div class="text-xs text-slate-400">Verified Organizations</div>
+            <div class="text-2xl font-black text-cyan-400 font-mono mt-1">142</div>
+            <div class="text-[10px] text-cyan-300 font-mono mt-1">Gov, Trusts, CSRs</div>
+          </div>
+          <div class="glass-panel p-5 rounded-2xl border border-white/10">
+            <div class="text-xs text-slate-400">Audit Trail Events</div>
+            <div class="text-2xl font-black text-amber-400 font-mono mt-1">1.2M logs</div>
+            <div class="text-[10px] text-amber-300 font-mono mt-1">Zero Security Breaches</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================== -->
+    <!-- SECTION 5: INTERNSHIP MARKETPLACE & LABS   -->
+    <!-- ========================================== -->
+    <section id="sector-internships" class="min-h-screen max-w-7xl mx-auto px-4 md:px-8 py-20 pointer-events-auto">
+      <div class="flex flex-col md:flex-row md:items-end justify-between mb-12">
+        <div>
+          <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-lg bg-indigo-500/10 border border-indigo-500/30 text-xs font-mono text-indigo-300 mb-2">
+            <i class="fa-solid fa-briefcase"></i>
+            <span>SECTOR 5: CAREER LAB &amp; INTERNSHIP ENGINE</span>
+          </div>
+          <h2 class="text-3xl md:text-5xl font-extrabold text-white">Launch Your Career</h2>
+          <p class="text-slate-400 text-sm md:text-base mt-2 max-w-xl">
+            Hands-on internships linked to 12-week structured curriculum, real project repositories, and mentor evaluation rubrics.
+          </p>
+        </div>
+      </div>
+
+      <!-- Internship Track Cards -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
+        
+        <!-- Track 1: Cloud & AI Engineering -->
+        <div class="glass-panel p-6 md:p-8 rounded-3xl border border-white/10 glass-card-interactive relative flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between mb-4">
+              <span class="px-2.5 py-1 rounded-lg bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-xs font-mono font-semibold">
+                💰 Paid • ₹35,000 / month
+              </span>
+              <span class="text-xs text-slate-400 font-mono">12 Weeks • Remote</span>
+            </div>
+            <h3 class="text-2xl font-bold text-white mb-1">Full-Stack Cloud &amp; AI Systems Intern</h3>
+            <p class="text-xs text-cyan-400 font-mono mb-4">Nexus Systems Inc. • Mentored by Staff Engineers</p>
+            <p class="text-slate-300 text-xs leading-relaxed mb-6">
+              Build high-throughput distributed microservices, integrate Gemini LLM inference pipelines, and implement resilient event-driven architectures.
+            </p>
+
+            <div class="space-y-2 mb-6">
+              <div class="text-[11px] font-mono text-slate-400 uppercase">Core Skills Required:</div>
+              <div class="flex flex-wrap gap-1.5">
+                <span class="px-2 py-0.5 rounded bg-white/5 text-slate-300 text-[11px] border border-white/5">TypeScript</span>
+                <span class="px-2 py-0.5 rounded bg-white/5 text-slate-300 text-[11px] border border-white/5">Node.js</span>
+                <span class="px-2 py-0.5 rounded bg-white/5 text-slate-300 text-[11px] border border-white/5">Docker</span>
+                <span class="px-2 py-0.5 rounded bg-white/5 text-slate-300 text-[11px] border border-white/5">Three.js</span>
+                <span class="px-2 py-0.5 rounded bg-white/5 text-slate-300 text-[11px] border border-white/5">PostgreSQL</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="pt-4 border-t border-white/10 flex items-center justify-between">
+            <button onclick="toggleModal('learning-center-modal')" class="text-xs font-bold text-cyan-300 hover:text-white flex items-center space-x-1">
+              <i class="fa-solid fa-list-check"></i>
+              <span>View 12-Week Syllabus</span>
+            </button>
+            <button onclick="openApplicationFlow('Full-Stack Cloud & AI Systems Intern', '₹35,000/mo', 'Corporate Paid')" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-bold text-xs shadow-md">
+              Apply for Internship
+            </button>
+          </div>
+        </div>
+
+        <!-- Track 2: Robotics & Embedded IoT -->
+        <div class="glass-panel p-6 md:p-8 rounded-3xl border border-white/10 glass-card-interactive relative flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between mb-4">
+              <span class="px-2.5 py-1 rounded-lg bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-xs font-mono font-semibold">
+                💰 Paid • ₹30,000 / month
+              </span>
+              <span class="text-xs text-slate-400 font-mono">10 Weeks • Hybrid</span>
+            </div>
+            <h3 class="text-2xl font-bold text-white mb-1">Autonomous Systems &amp; Robotics Intern</h3>
+            <p class="text-xs text-cyan-400 font-mono mb-4">AeroDynamics Lab • Hyderabad Research Campus</p>
+            <p class="text-slate-300 text-xs leading-relaxed mb-6">
+              Develop real-time computer vision algorithms on edge microcontrollers, program ROS2 sensor nodes, and conduct hardware-in-the-loop telemetry tests.
+            </p>
+
+            <div class="space-y-2 mb-6">
+              <div class="text-[11px] font-mono text-slate-400 uppercase">Core Skills Required:</div>
+              <div class="flex flex-wrap gap-1.5">
+                <span class="px-2 py-0.5 rounded bg-white/5 text-slate-300 text-[11px] border border-white/5">C++</span>
+                <span class="px-2 py-0.5 rounded bg-white/5 text-slate-300 text-[11px] border border-white/5">ROS2</span>
+                <span class="px-2 py-0.5 rounded bg-white/5 text-slate-300 text-[11px] border border-white/5">Python</span>
+                <span class="px-2 py-0.5 rounded bg-white/5 text-slate-300 text-[11px] border border-white/5">OpenCV</span>
+                <span class="px-2 py-0.5 rounded bg-white/5 text-slate-300 text-[11px] border border-white/5">Embedded C</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="pt-4 border-t border-white/10 flex items-center justify-between">
+            <button onclick="toggleModal('learning-center-modal')" class="text-xs font-bold text-cyan-300 hover:text-white flex items-center space-x-1">
+              <i class="fa-solid fa-list-check"></i>
+              <span>View 12-Week Syllabus</span>
+            </button>
+            <button onclick="openApplicationFlow('Autonomous Systems & Robotics Intern', '₹30,000/mo', 'Corporate Paid')" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-indigo-500 to-fuchsia-600 hover:from-indigo-400 hover:to-fuchsia-500 text-white font-bold text-xs shadow-md">
+              Apply for Internship
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Rubric & Mentorship Scoring Banner -->
+      <div class="glass-panel p-6 rounded-2xl border border-white/10 flex flex-col md:flex-row items-center justify-between gap-4">
+        <div class="flex items-center space-x-4">
+          <div class="w-12 h-12 rounded-2xl bg-amber-500/20 text-amber-400 flex items-center justify-center text-2xl font-bold">
+            <i class="fa-solid fa-award"></i>
+          </div>
+          <div>
+            <h4 class="font-bold text-white text-base">Verified Project Mentorship Rubric</h4>
+            <p class="text-xs text-slate-400">Evaluated on Technical Rigor, Clean Code, Documentation, Problem Solving, and Production Readiness.</p>
+          </div>
+        </div>
+        <div class="text-xs font-mono text-cyan-300 bg-white/5 px-4 py-2 rounded-xl border border-white/10">
+          NFT &amp; Cryptographically Signed Certificates
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ========================================== -->
+  <!-- MODAL: SCHOLARSHIP APPLICATION WORKFLOW    -->
+  <!-- ========================================== -->
+  <div id="application-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md hidden">
+    <div class="glass-panel w-full max-w-2xl rounded-3xl border border-white/20 p-6 md:p-8 max-h-[90vh] overflow-y-auto">
+      
+      <!-- Modal Header -->
+      <div class="flex items-center justify-between border-b border-white/10 pb-4 mb-6">
+        <div>
+          <span class="text-[10px] font-mono text-cyan-400 uppercase tracking-widest">Multi-Step Verified Gateway</span>
+          <h3 class="text-xl font-black text-white" id="modal-app-title">Apply for Scholarship</h3>
+          <p class="text-xs text-slate-400" id="modal-app-sub">Grant Coverage: ₹1,50,000 / Year</p>
+        </div>
+        <button onclick="toggleModal('application-modal')" class="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+      </div>
+
+      <!-- Step Indicator -->
+      <div class="flex items-center justify-between mb-8 px-2">
+        <div class="flex flex-col items-center">
+          <div id="step-dot-1" class="w-8 h-8 rounded-full bg-cyan-500 text-slate-950 font-bold flex items-center justify-center text-xs">1</div>
+          <span class="text-[10px] text-cyan-300 mt-1">Profile</span>
+        </div>
+        <div class="flex-1 h-[2px] bg-cyan-500/40 mx-2"></div>
+        <div class="flex flex-col items-center">
+          <div id="step-dot-2" class="w-8 h-8 rounded-full bg-slate-800 text-slate-400 font-bold flex items-center justify-center text-xs">2</div>
+          <span class="text-[10px] text-slate-400 mt-1">Eligibility</span>
+        </div>
+        <div class="flex-1 h-[2px] bg-slate-800 mx-2"></div>
+        <div class="flex flex-col items-center">
+          <div id="step-dot-3" class="w-8 h-8 rounded-full bg-slate-800 text-slate-400 font-bold flex items-center justify-center text-xs">3</div>
+          <span class="text-[10px] text-slate-400 mt-1">Documents</span>
+        </div>
+        <div class="flex-1 h-[2px] bg-slate-800 mx-2"></div>
+        <div class="flex flex-col items-center">
+          <div id="step-dot-4" class="w-8 h-8 rounded-full bg-slate-800 text-slate-400 font-bold flex items-center justify-center text-xs">4</div>
+          <span class="text-[10px] text-slate-400 mt-1">Submit</span>
+        </div>
+      </div>
+
+      <!-- STEP CONTENTS -->
+      <!-- Step 1: Profile -->
+      <div id="app-step-1" class="space-y-4 text-xs">
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-slate-400 mb-1">Full Legal Name</label>
+            <input type="text" value="Aryan Kulkarni" class="w-full px-3 py-2.5 rounded-xl bg-slate-900 border border-white/10 text-white focus:outline-none focus:border-cyan-400">
+          </div>
+          <div>
+            <label class="block text-slate-400 mb-1">Institutional Email</label>
+            <input type="email" value="aryan.k@iith.ac.in" class="w-full px-3 py-2.5 rounded-xl bg-slate-900 border border-white/10 text-white focus:outline-none focus:border-cyan-400">
+          </div>
+        </div>
+        <div>
+          <label class="block text-slate-400 mb-1">University / College Registration Number</label>
+          <input type="text" value="IITH/2023/BTECH/CS/084" class="w-full px-3 py-2.5 rounded-xl bg-slate-900 border border-white/10 text-white focus:outline-none focus:border-cyan-400">
+        </div>
+        <div class="pt-4 flex justify-end">
+          <button onclick="setAppStep(2)" class="px-6 py-2.5 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold text-xs">
+            Continue to Eligibility &rarr;
+          </button>
+        </div>
+      </div>
+
+      <!-- Step 2: Eligibility -->
+      <div id="app-step-2" class="space-y-4 text-xs hidden">
+        <div class="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-300">
+          <i class="fa-solid fa-circle-check mr-2"></i> AI Pre-verification passed: Your profile satisfies all hard criteria constraints.
+        </div>
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-slate-400 mb-1">Current Cumulative CGPA</label>
+            <input type="text" value="8.82" class="w-full px-3 py-2.5 rounded-xl bg-slate-900 border border-white/10 text-white focus:outline-none focus:border-cyan-400">
+          </div>
+          <div>
+            <label class="block text-slate-400 mb-1">Annual Family Income (INR)</label>
+            <input type="text" value="₹4,20,000" class="w-full px-3 py-2.5 rounded-xl bg-slate-900 border border-white/10 text-white focus:outline-none focus:border-cyan-400">
+          </div>
+        </div>
+        <div class="pt-4 flex justify-between">
+          <button onclick="setAppStep(1)" class="px-4 py-2 rounded-xl bg-white/5 text-slate-300">Back</button>
+          <button onclick="setAppStep(3)" class="px-6 py-2.5 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold text-xs">
+            Continue to Documents &rarr;
+          </button>
+        </div>
+      </div>
+
+      <!-- Step 3: Documents -->
+      <div id="app-step-3" class="space-y-4 text-xs hidden">
+        <div class="space-y-2">
+          <div class="p-3 rounded-xl bg-white/5 border border-white/10 flex items-center justify-between">
+            <span class="text-white"><i class="fa-solid fa-file-pdf text-red-400 mr-2"></i> Verified Marksheets (Sem 1-4)</span>
+            <span class="text-emerald-400 font-mono text-[10px]"><i class="fa-solid fa-check"></i> Uploaded</span>
+          </div>
+          <div class="p-3 rounded-xl bg-white/5 border border-white/10 flex items-center justify-between">
+            <span class="text-white"><i class="fa-solid fa-id-card text-blue-400 mr-2"></i> National Identity / Aadhar</span>
+            <span class="text-emerald-400 font-mono text-[10px]"><i class="fa-solid fa-check"></i> Uploaded</span>
+          </div>
+          <div class="p-3 rounded-xl bg-white/5 border border-amber-500/30 flex items-center justify-between">
+            <span class="text-white"><i class="fa-solid fa-receipt text-amber-400 mr-2"></i> Income Certificate FY 25-26</span>
+            <button class="px-2 py-1 rounded bg-amber-500/20 text-amber-300 font-mono text-[10px]">Refresh File</button>
+          </div>
+        </div>
+        <div class="pt-4 flex justify-between">
+          <button onclick="setAppStep(2)" class="px-4 py-2 rounded-xl bg-white/5 text-slate-300">Back</button>
+          <button onclick="setAppStep(4)" class="px-6 py-2.5 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold text-xs">
+            Review Application &rarr;
+          </button>
+        </div>
+      </div>
+
+      <!-- Step 4: Review & Submit -->
+      <div id="app-step-4" class="space-y-4 text-xs hidden">
+        <div class="p-4 rounded-xl bg-white/5 border border-white/10 space-y-2">
+          <div class="flex justify-between">
+            <span class="text-slate-400">Applicant:</span>
+            <span class="text-white font-bold">Aryan Kulkarni (8.82 CGPA)</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-slate-400">Program:</span>
+            <span class="text-cyan-400 font-semibold" id="confirm-app-name">National STEM Innovation Grant</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-slate-400">Fee Escrow Routing:</span>
+            <span class="text-emerald-400">Direct to IIT Hyderabad College Ledger</span>
+          </div>
+        </div>
+        <div class="flex items-center space-x-2 text-slate-400 text-[11px]">
+          <input type="checkbox" id="legal-check" checked class="rounded accent-cyan-400">
+          <label for="legal-check">I attest all submitted credentials match government records under penalty of debarment.</label>
+        </div>
+        <div class="pt-4 flex justify-between">
+          <button onclick="setAppStep(3)" class="px-4 py-2 rounded-xl bg-white/5 text-slate-300">Back</button>
+          <button onclick="submitApplicationAction()" class="px-6 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-cyan-500 hover:from-emerald-400 hover:to-cyan-400 text-slate-950 font-bold text-xs shadow-lg shadow-emerald-500/20">
+            Confirm &amp; Submit Application
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- MODAL: CREATE FUNDING PROGRAM (ORGANIZATION) -->
+  <!-- ========================================== -->
+  <div id="create-funding-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md hidden">
+    <div class="glass-panel w-full max-w-2xl rounded-3xl border border-white/20 p-6 md:p-8 max-h-[90vh] overflow-y-auto">
+      <div class="flex items-center justify-between border-b border-white/10 pb-4 mb-6">
+        <div>
+          <span class="text-[10px] font-mono text-fuchsia-400 uppercase tracking-widest">Organization &amp; CSR Gateway</span>
+          <h3 class="text-xl font-black text-white">Create New Funding Program</h3>
+        </div>
+        <button onclick="toggleModal('create-funding-modal')" class="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+      </div>
+
+      <form id="create-funding-form" onsubmit="handleCreateFunding(event)" class="space-y-4 text-xs">
+        <div>
+          <label class="block text-slate-400 mb-1">Funding Program Name</label>
+          <input type="text" id="prog-name" required placeholder="e.g. 2027 Women in Quantum Computing Fellowship" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-white/10 text-white focus:outline-none focus:border-fuchsia-400">
+        </div>
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-slate-400 mb-1">Funding Type</label>
+            <select id="prog-type" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-white/10 text-white focus:outline-none focus:border-fuchsia-400">
+              <option value="Merit">Merit Scholarship</option>
+              <option value="Need">Need-Based Assistance</option>
+              <option value="Research">Research Fellowship</option>
+              <option value="Internship">Internship Stipend Aid</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-slate-400 mb-1">Total Dedicated Budget (INR)</label>
+            <input type="text" id="prog-budget" required placeholder="e.g. ₹50,00,000" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-white/10 text-white focus:outline-none focus:border-fuchsia-400">
+          </div>
+        </div>
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-slate-400 mb-1">Award Amount Per Student</label>
+            <input type="text" id="prog-amount" required placeholder="e.g. ₹1,00,000" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-white/10 text-white focus:outline-none focus:border-fuchsia-400">
+          </div>
+          <div>
+            <label class="block text-slate-400 mb-1">Slots / Max Students</label>
+            <input type="number" id="prog-slots" required placeholder="e.g. 50" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-white/10 text-white focus:outline-none focus:border-fuchsia-400">
+          </div>
+        </div>
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-slate-400 mb-1">Minimum CGPA Filter</label>
+            <input type="text" id="prog-cgpa" placeholder="e.g. 7.50" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-white/10 text-white focus:outline-none focus:border-fuchsia-400">
+          </div>
+          <div>
+            <label class="block text-slate-400 mb-1">Application Deadline</label>
+            <input type="date" id="prog-deadline" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-white/10 text-white focus:outline-none focus:border-fuchsia-400">
+          </div>
+        </div>
+
+        <div class="pt-4 flex justify-end space-x-3">
+          <button type="button" onclick="toggleModal('create-funding-modal')" class="px-4 py-2 rounded-xl bg-white/5 text-slate-300">Cancel</button>
+          <button type="submit" class="px-6 py-2.5 rounded-xl bg-gradient-to-r from-fuchsia-600 to-pink-600 hover:from-fuchsia-500 hover:to-pink-500 text-white font-bold text-xs shadow-lg shadow-fuchsia-500/20">
+            Publish Opportunity Live
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- MODAL: 12-WEEK LEARNING CENTER & SYLLABUS  -->
+  <!-- ========================================== -->
+  <div id="learning-center-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md hidden">
+    <div class="glass-panel w-full max-w-3xl rounded-3xl border border-white/20 p-6 md:p-8 max-h-[90vh] overflow-y-auto">
+      <div class="flex items-center justify-between border-b border-white/10 pb-4 mb-6">
+        <div>
+          <span class="text-[10px] font-mono text-cyan-400 uppercase tracking-widest">Interactive Curriculum Engine</span>
+          <h3 class="text-xl font-black text-white">12-Week Cloud &amp; AI Systems Sprint</h3>
+        </div>
+        <button onclick="toggleModal('learning-center-modal')" class="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+      </div>
+
+      <div class="space-y-3 text-xs">
+        <div class="p-3.5 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-between">
+          <div class="flex items-center space-x-3">
+            <span class="w-6 h-6 rounded-lg bg-emerald-500 text-slate-950 font-bold flex items-center justify-center text-[10px]">W1</span>
+            <div>
+              <div class="font-bold text-white">Distributed Architecture &amp; Event Loops</div>
+              <div class="text-[10px] text-slate-400">Microservice boundaries, gRPC, and message streaming.</div>
+            </div>
+          </div>
+          <span class="text-emerald-400 font-mono text-[10px]"><i class="fa-solid fa-circle-check"></i> Passed (Score: 98%)</span>
+        </div>
+
+        <div class="p-3.5 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-between">
+          <div class="flex items-center space-x-3">
+            <span class="w-6 h-6 rounded-lg bg-emerald-500 text-slate-950 font-bold flex items-center justify-center text-[10px]">W4</span>
+            <div>
+              <div class="font-bold text-white">Database Partitioning &amp; High-Throughput ACID</div>
+              <div class="text-[10px] text-slate-400">Index optimization, replication sets, and caching tiers.</div>
+            </div>
+          </div>
+          <span class="text-emerald-400 font-mono text-[10px]"><i class="fa-solid fa-circle-check"></i> Passed (Score: 92%)</span>
+        </div>
+
+        <div class="p-3.5 rounded-2xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-between">
+          <div class="flex items-center space-x-3">
+            <span class="w-6 h-6 rounded-lg bg-cyan-500 text-slate-950 font-bold flex items-center justify-center text-[10px]">W8</span>
+            <div>
+              <div class="font-bold text-cyan-300">Current Sprint: Gemini AI Integration &amp; WebGL Engine</div>
+              <div class="text-[10px] text-slate-300">Three.js scene management &amp; deterministic API endpoints.</div>
+            </div>
+          </div>
+          <span class="text-cyan-400 font-mono text-[10px] animate-pulse">In Progress (Due: 3 Days)</span>
+        </div>
+
+        <div class="p-3.5 rounded-2xl bg-white/5 border border-white/5 flex items-center justify-between opacity-60">
+          <div class="flex items-center space-x-3">
+            <span class="w-6 h-6 rounded-lg bg-slate-800 text-slate-400 font-bold flex items-center justify-center text-[10px]">W12</span>
+            <div>
+              <div class="font-bold text-white">Capstone Production Deployment &amp; Mentor Scorecard</div>
+              <div class="text-[10px] text-slate-400">Technical defense in front of company senior engineering panel.</div>
+            </div>
+          </div>
+          <span class="text-slate-500 font-mono text-[10px]"><i class="fa-solid fa-lock"></i> Locked</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- MODAL: GLOBAL AI SEARCH ENGINE             -->
+  <!-- ========================================== -->
+  <div id="search-modal" class="fixed inset-0 z-50 flex items-start justify-center p-4 pt-20 bg-slate-950/80 backdrop-blur-md hidden">
+    <div class="glass-panel w-full max-w-2xl rounded-3xl border border-white/20 p-6 shadow-2xl">
+      <div class="flex items-center space-x-3 border-b border-white/10 pb-4">
+        <i class="fa-solid fa-magnifying-glass text-cyan-400 text-lg"></i>
+        <input type="text" id="global-search-input" oninput="handleGlobalSearch(this.value)" placeholder="Search 'Engineering scholarships under ₹1 lakh' or 'IIT Hyderabad'..." class="w-full bg-transparent text-white placeholder-slate-500 text-sm focus:outline-none">
+        <button onclick="toggleModal('search-modal')" class="text-slate-400 hover:text-white">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div id="search-results-list" class="mt-4 space-y-2 max-h-60 overflow-y-auto text-xs">
+        <div class="text-slate-400 p-2 text-center text-xs">Type a query or skill to search funding, internships, and courses...</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- MODAL: NOTIFICATION CENTER                 -->
+  <!-- ========================================== -->
+  <div id="notifications-modal" class="fixed inset-0 z-50 flex items-start justify-center md:justify-end p-4 pt-20 md:pr-12 bg-slate-950/60 backdrop-blur-sm hidden">
+    <div class="glass-panel w-full max-w-sm rounded-3xl border border-white/20 p-5 shadow-2xl space-y-3">
+      <div class="flex items-center justify-between border-b border-white/10 pb-2">
+        <h4 class="font-bold text-white text-sm">Notifications (3 New)</h4>
+        <button onclick="toggleModal('notifications-modal')" class="text-slate-400 hover:text-white text-xs">Close</button>
+      </div>
+      <div class="space-y-2 text-xs">
+        <div class="p-2.5 rounded-xl bg-cyan-500/10 border border-cyan-500/20 text-slate-200">
+          <div class="font-bold text-cyan-300">🔔 Scholarship Deadline Approaching</div>
+          <div class="text-[11px] text-slate-400 mt-0.5">National STEM Innovation Grant deadline closes in 5 days.</div>
+        </div>
+        <div class="p-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-slate-200">
+          <div class="font-bold text-emerald-300">🎉 Application Shortlisted</div>
+          <div class="text-[11px] text-slate-400 mt-0.5">Nexus Systems Inc. shortlisted you for Stage 2 Tech Review.</div>
+        </div>
+        <div class="p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/20 text-slate-200">
+          <div class="font-bold text-amber-300">⚠️ Income Document Notice</div>
+          <div class="text-[11px] text-slate-400 mt-0.5">Annual income certificate requires updated renewal stamp.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- DRAWER: PERSISTENT AI CAREER ASSISTANT     -->
+  <!-- ========================================== -->
+  <div id="ai-assistant-drawer" class="fixed bottom-24 right-6 z-50 w-full max-w-sm glass-panel rounded-3xl border border-cyan-500/40 p-5 shadow-2xl hidden flex flex-col max-h-[500px]">
+    <!-- Header -->
+    <div class="flex items-center justify-between border-b border-white/10 pb-3 mb-3">
+      <div class="flex items-center space-x-2">
+        <div class="w-7 h-7 rounded-lg bg-cyan-400 text-slate-950 flex items-center justify-center text-xs font-bold">
+          <i class="fa-solid fa-robot"></i>
+        </div>
+        <div>
+          <div class="font-bold text-white text-xs">ScholarAI Copilot</div>
+          <div class="text-[10px] text-cyan-300 font-mono">Autonomous Career Engine</div>
+        </div>
+      </div>
+      <button onclick="toggleAIAssistantDrawer()" class="text-slate-400 hover:text-white">
+        <i class="fa-solid fa-chevron-down text-xs"></i>
+      </button>
+    </div>
+
+    <!-- Chat Messages Container -->
+    <div id="ai-chat-messages" class="flex-1 overflow-y-auto space-y-2.5 text-xs pr-1 mb-3">
+      <div class="p-3 rounded-2xl bg-cyan-500/10 border border-cyan-500/20 text-slate-200">
+        👋 Hello! I am your ScholarAI Assistant. Ask me about your eligibility, document verification status, or request a 12-week custom learning path.
+      </div>
+    </div>
+
+    <!-- Suggested Quick Prompts -->
+    <div class="flex flex-wrap gap-1 mb-2">
+      <button onclick="askAIAssistant('Which scholarships am I eligible for?')" class="px-2 py-1 rounded-lg bg-white/5 hover:bg-white/10 text-[10px] text-cyan-300 border border-white/10">Eligible Scholarships?</button>
+      <button onclick="askAIAssistant('What documents am I missing?')" class="px-2 py-1 rounded-lg bg-white/5 hover:bg-white/10 text-[10px] text-amber-300 border border-white/10">Missing Documents?</button>
+      <button onclick="askAIAssistant('Explain my fee support breakdown')" class="px-2 py-1 rounded-lg bg-white/5 hover:bg-white/10 text-[10px] text-fuchsia-300 border border-white/10">Fee Breakdown?</button>
+    </div>
+
+    <!-- Input Form -->
+    <form onsubmit="handleAIChatSubmit(event)" class="flex items-center space-x-2">
+      <input type="text" id="ai-chat-input" placeholder="Ask AI Assistant..." class="flex-1 px-3 py-2 rounded-xl bg-slate-900 border border-white/10 text-white text-xs focus:outline-none focus:border-cyan-400">
+      <button type="submit" class="p-2 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold text-xs">
+        <i class="fa-solid fa-paper-plane"></i>
+      </button>
+    </form>
+  </div>
+
+  <script>
+    /* ==========================================================================
+       THREE.JS WEBGL 3D SPATIAL UNIVERSE CONTROLLER
+       ========================================================================== */
+
+    let scene, camera, renderer;
+    let particleCloud, floatingGroup, neuralAIGroup, careerGraphGroup;
+    let targetCameraPosition = new THREE.Vector3(0, 0, 32);
+    let targetLookAt = new THREE.Vector3(0, 0, 0);
+    let currentLookAt = new THREE.Vector3(0, 0, 0);
+    let mouse = { x: 0, y: 0, targetX: 0, targetY: 0 };
+    let isHighPerformance = true;
+    let clock = new THREE.Clock();
+
+    // 3D Spatial Coordinates for Sectors/Stations
+    const STATIONS = {
+      hero: {
+        pos: new THREE.Vector3(0, 0, 32),
+        look: new THREE.Vector3(0, 0, 0),
+        name: 'STATION 0: UNIVERSE CORE',
+        hud: '[X: 0.0, Y: 0.0, Z: 32.0]'
+      },
+      funding: {
+        pos: new THREE.Vector3(0, -22, 24),
+        look: new THREE.Vector3(0, -20, 0),
+        name: 'STATION 1: FUNDING UNIVERSE',
+        hud: '[X: 0.0, Y: -22.0, Z: 24.0]'
+      },
+      aimatch: {
+        pos: new THREE.Vector3(26, 6, 12),
+        look: new THREE.Vector3(15, 4, 0),
+        name: 'STATION 2: AI NEURAL MATCHER',
+        hud: '[X: 26.0, Y: 6.0, Z: 12.0]'
+      },
+      career: {
+        pos: new THREE.Vector3(-24, 8, 14),
+        look: new THREE.Vector3(-15, 6, 0),
+        name: 'STATION 3: 3D CAREER GRAPH',
+        hud: '[X: -24.0, Y: 8.0, Z: 14.0]'
+      },
+      internships: {
+        pos: new THREE.Vector3(0, 24, 20),
+        look: new THREE.Vector3(0, 20, 0),
+        name: 'STATION 5: CAREER LAB & INTERNSHIP',
+        hud: '[X: 0.0, Y: 24.0, Z: 20.0]'
+      },
+      portals: {
+        pos: new THREE.Vector3(0, -40, 22),
+        look: new THREE.Vector3(0, -38, 0),
+        name: 'STATION 4: COMMAND CENTRES',
+        hud: '[X: 0.0, Y: -40.0, Z: 22.0]'
+      }
+    };
+
+    function init3DUniverse() {
+      const canvas = document.getElementById('webgl-canvas');
+      scene = new THREE.Scene();
+      scene.fog = new THREE.FogExp2(0x050814, 0.02);
+
+      camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 1000);
+      camera.position.set(0, 0, 32);
+
+      renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: true });
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+      // 1. Dynamic Ambient & Directional Lights
+      const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+      scene.add(ambientLight);
+
+      const cyanPointLight = new THREE.PointLight(0x00F2FE, 2.5, 70);
+      cyanPointLight.position.set(-15, 12, 10);
+      scene.add(cyanPointLight);
+
+      const magentaPointLight = new THREE.PointLight(0xE100FF, 2.5, 70);
+      magentaPointLight.position.set(15, -12, 10);
+      scene.add(magentaPointLight);
+
+      const blueDirectional = new THREE.DirectionalLight(0x4FACFE, 1.2);
+      blueDirectional.position.set(0, 20, 20);
+      scene.add(blueDirectional);
+
+      // 2. Cosmic Particle Field
+      createParticleField(isHighPerformance ? 2200 : 700);
+
+      // 3. Floating Geometric 3D Entities (Graduation Cap, Golden Icosahedron, AI Core)
+      createFloatingEntities();
+
+      // 4. Glowing AI Neural Sphere
+      createNeuralAICore();
+
+      // 5. Interconnected 3D Career Node Topology
+      createCareerGraphMesh();
+
+      // Event Listeners for interaction
+      window.addEventListener('resize', onWindowResize, false);
+      window.addEventListener('mousemove', onMouseMove, false);
+      window.addEventListener('touchmove', onTouchMove, { passive: true });
+
+      // Start main 60 FPS animation loop
+      animateUniverse();
+    }
+
+    function createParticleField(count) {
+      if (particleCloud) scene.remove(particleCloud);
+
+      const geometry = new THREE.BufferGeometry();
+      const positions = new Float32Array(count * 3);
+      const colors = new Float32Array(count * 3);
+
+      const colorPalette = [
+        new THREE.Color(0x00F2FE), // Cyan
+        new THREE.Color(0x4FACFE), // Blue
+        new THREE.Color(0x7F00FF), // Violet
+        new THREE.Color(0xE100FF), // Magenta
+        new THREE.Color(0xFFD700)  // Gold
+      ];
+
+      for (let i = 0; i < count; i++) {
+        positions[i * 3] = (Math.random() - 0.5) * 120;
+        positions[i * 3 + 1] = (Math.random() - 0.5) * 120;
+        positions[i * 3 + 2] = (Math.random() - 0.5) * 80;
+
+        const col = colorPalette[Math.floor(Math.random() * colorPalette.length)];
+        colors[i * 3] = col.r;
+        colors[i * 3 + 1] = col.g;
+        colors[i * 3 + 2] = col.b;
+      }
+
+      geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+      geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+
+      const material = new THREE.PointsMaterial({
+        size: 0.25,
+        vertexColors: true,
+        transparent: true,
+        opacity: 0.75,
+        blending: THREE.AdditiveBlending
+      });
+
+      particleCloud = new THREE.Points(geometry, material);
+      scene.add(particleCloud);
+    }
+
+    function createFloatingEntities() {
+      floatingGroup = new THREE.Group();
+
+      // Entity 1: Golden Award Icosahedron (Symbolizing Scholarships)
+      const icoGeo = new THREE.IcosahedronGeometry(2.2, 0);
+      const icoMat = new THREE.MeshStandardMaterial({
+        color: 0xFFD700,
+        metalness: 0.85,
+        roughness: 0.15,
+        wireframe: false,
+        emissive: 0x996515,
+        emissiveIntensity: 0.2
+      });
+      const icoMesh = new THREE.Mesh(icoGeo, icoMat);
+      icoMesh.position.set(-9, 5, 2);
+      floatingGroup.add(icoMesh);
+
+      // Entity 2: Futuristic Octahedron (Careers & Internships)
+      const octGeo = new THREE.OctahedronGeometry(2.0, 0);
+      const octMat = new THREE.MeshStandardMaterial({
+        color: 0x00F2FE,
+        metalness: 0.9,
+        roughness: 0.2,
+        wireframe: true
+      });
+      const octMesh = new THREE.Mesh(octGeo, octMat);
+      octMesh.position.set(9, -4, 4);
+      floatingGroup.add(octMesh);
+
+      // Entity 3: Torus Knot (Ecosystem Interconnectivity)
+      const torusGeo = new THREE.TorusKnotGeometry(1.6, 0.4, 64, 16);
+      const torusMat = new THREE.MeshStandardMaterial({
+        color: 0xE100FF,
+        metalness: 0.6,
+        roughness: 0.3,
+        emissive: 0x4a0050,
+        emissiveIntensity: 0.3
+      });
+      const torusMesh = new THREE.Mesh(torusGeo, torusMat);
+      torusMesh.position.set(10, 6, -4);
+      floatingGroup.add(torusMesh);
+
+      scene.add(floatingGroup);
+    }
+
+    function createNeuralAICore() {
+      neuralAIGroup = new THREE.Group();
+      neuralAIGroup.position.set(16, 4, -2);
+
+      // Inner Glowing Core
+      const sphereGeo = new THREE.SphereGeometry(2.6, 32, 32);
+      const sphereMat = new THREE.MeshStandardMaterial({
+        color: 0x00F2FE,
+        emissive: 0x00A3FF,
+        emissiveIntensity: 0.8,
+        wireframe: true
+      });
+      const coreSphere = new THREE.Mesh(sphereGeo, sphereMat);
+      neuralAIGroup.add(coreSphere);
+
+      // Outer Orbital Wire Ring
+      const ringGeo = new THREE.RingGeometry(3.6, 3.8, 48);
+      const ringMat = new THREE.MeshBasicMaterial({ color: 0xE100FF, side: THREE.DoubleSide });
+      const ringMesh = new THREE.Mesh(ringGeo, ringMat);
+      ringMesh.rotation.x = Math.PI / 3;
+      neuralAIGroup.add(ringMesh);
+
+      scene.add(neuralAIGroup);
+    }
+
+    function createCareerGraphMesh() {
+      careerGraphGroup = new THREE.Group();
+      careerGraphGroup.position.set(-16, 6, -2);
+
+      const nodePositions = [
+        new THREE.Vector3(-4, -3, 0),
+        new THREE.Vector3(-2, 0, 1),
+        new THREE.Vector3(0, 2, -1),
+        new THREE.Vector3(2, 0, 1),
+        new THREE.Vector3(4, 3, 0)
+      ];
+
+      // Draw Nodes
+      const nodeGeo = new THREE.SphereGeometry(0.55, 16, 16);
+      const nodeMat = new THREE.MeshStandardMaterial({
+        color: 0x4FACFE,
+        emissive: 0x0055ff,
+        emissiveIntensity: 0.6
+      });
+
+      nodePositions.forEach((pos) => {
+        const mesh = new THREE.Mesh(nodeGeo, nodeMat);
+        mesh.position.copy(pos);
+        careerGraphGroup.add(mesh);
+      });
+
+      // Draw Interconnecting Tubes/Lines
+      const lineGeo = new THREE.BufferGeometry().setFromPoints(nodePositions);
+      const lineMat = new THREE.LineBasicMaterial({ color: 0x00F2FE, linewidth: 2 });
+      const lineMesh = new THREE.Line(lineGeo, lineMat);
+      careerGraphGroup.add(lineMesh);
+
+      scene.add(careerGraphGroup);
+    }
+
+    function onWindowResize() {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    }
+
+    function onMouseMove(e) {
+      mouse.targetX = (e.clientX / window.innerWidth - 0.5) * 2;
+      mouse.targetY = -(e.clientY / window.innerHeight - 0.5) * 2;
+    }
+
+    function onTouchMove(e) {
+      if (e.touches.length > 0) {
+        mouse.targetX = (e.touches[0].clientX / window.innerWidth - 0.5) * 2;
+        mouse.targetY = -(e.touches[0].clientY / window.innerHeight - 0.5) * 2;
+      }
+    }
+
+    function animateUniverse() {
+      requestAnimationFrame(animateUniverse);
+
+      const delta = clock.getDelta();
+      const time = clock.getElapsedTime();
+
+      // Mouse Parallax Lerping
+      mouse.x += (mouse.targetX - mouse.x) * 0.05;
+      mouse.y += (mouse.targetY - mouse.y) * 0.05;
+
+      // Smooth Camera Flight Lerp
+      camera.position.x += (targetCameraPosition.x + mouse.x * 2 - camera.position.x) * 0.04;
+      camera.position.y += (targetCameraPosition.y + mouse.y * 2 - camera.position.y) * 0.04;
+      camera.position.z += (targetCameraPosition.z - camera.position.z) * 0.04;
+
+      currentLookAt.lerp(targetLookAt, 0.04);
+      camera.lookAt(currentLookAt);
+
+      // Rotate Floating Cosmic Objects
+      if (floatingGroup) {
+        floatingGroup.rotation.y = time * 0.12;
+        floatingGroup.children[0].rotation.x = time * 0.3;
+        floatingGroup.children[0].rotation.y = time * 0.2;
+        floatingGroup.children[1].rotation.x = time * -0.25;
+        floatingGroup.children[2].rotation.z = time * 0.2;
+      }
+
+      // Rotate AI Neural Core
+      if (neuralAIGroup) {
+        neuralAIGroup.rotation.y = time * 0.35;
+        neuralAIGroup.children[0].scale.setScalar(1 + Math.sin(time * 3) * 0.06);
+        neuralAIGroup.children[1].rotation.z = time * 0.5;
+      }
+
+      // Slowly Drift Particle Cloud
+      if (particleCloud) {
+        particleCloud.rotation.y = time * 0.015;
+      }
+
+      renderer.render(scene, camera);
+    }
+
+    function flyToStation(stationKey) {
+      const station = STATIONS[stationKey];
+      if (!station) return;
+
+      targetCameraPosition.copy(station.pos);
+      targetLookAt.copy(station.look);
+
+      // Update HUD Coordinates
+      const hudCoordEl = document.getElementById('hud-coord-text');
+      const hudLabelEl = document.getElementById('hud-station-label');
+      if (hudCoordEl) hudCoordEl.innerText = station.hud;
+      if (hudLabelEl) hudLabelEl.innerText = station.name;
+
+      // Scroll DOM cleanly to corresponding sector
+      const sectorMap = {
+        hero: 'sector-hero',
+        funding: 'sector-funding',
+        aimatch: 'sector-aimatch',
+        career: 'sector-career',
+        internships: 'sector-internships',
+        portals: 'sector-portals'
+      };
+
+      const targetEl = document.getElementById(sectorMap[stationKey]);
+      if (targetEl) {
+        targetEl.scrollIntoView({ behavior: 'smooth' });
+      }
+
+      // Update Active Navigation Button Styling
+      document.querySelectorAll('nav button').forEach(btn => {
+        btn.classList.remove('bg-cyan-500/10', 'text-cyan-300');
+        btn.classList.add('text-slate-300');
+      });
+      const activeBtn = document.getElementById(`nav-btn-${stationKey}`);
+      if (activeBtn) {
+        activeBtn.classList.add('bg-cyan-500/10', 'text-cyan-300');
+      }
+    }
+
+    /* ==========================================================================
+       USER INTERACTION & MODAL CONTROLLERS
+       ========================================================================== */
+
+    function toggleModal(modalId) {
+      const modal = document.getElementById(modalId);
+      if (!modal) return;
+      modal.classList.toggle('hidden');
+    }
+
+    function togglePortalDropdown() {
+      const menu = document.getElementById('portal-role-menu');
+      menu.classList.toggle('hidden');
+    }
+
+    function switchRole(roleName) {
+      document.getElementById('portal-role-menu').classList.add('hidden');
+      document.getElementById('current-role-label').innerText = `${roleName} Hub`;
+
+      const viewCollege = document.getElementById('portal-view-college');
+      const viewOrg = document.getElementById('portal-view-org');
+      const viewAdmin = document.getElementById('portal-view-admin');
+
+      const heading = document.getElementById('portal-heading');
+      const subheading = document.getElementById('portal-subheading');
+
+      // Hide all
+      viewCollege.classList.add('hidden');
+      viewOrg.classList.add('hidden');
+      viewAdmin.classList.add('hidden');
+
+      // Update tabs
+      ['College', 'Organization', 'SuperAdmin'].forEach(r => {
+        const tab = document.getElementById(`tab-role-${r}`);
+        if (tab) {
+          tab.className = "px-3 py-2 rounded-xl text-slate-400 hover:text-white transition-all";
+        }
+      });
+
+      if (roleName === 'College') {
+        viewCollege.classList.remove('hidden');
+        heading.innerText = 'College Command Center';
+        subheading.innerText = 'University department roster, student fee ledger protection, and funding reconciliation.';
+        document.getElementById('tab-role-College').className = "px-3 py-2 rounded-xl bg-cyan-500 text-slate-950 font-bold transition-all";
+      } else if (roleName === 'Organization') {
+        viewOrg.classList.remove('hidden');
+        heading.innerText = 'Organization & CSR Command Center';
+        subheading.innerText = 'Create scholarships, manage corporate grants, and oversee shortlisted candidates.';
+        document.getElementById('tab-role-Organization').className = "px-3 py-2 rounded-xl bg-fuchsia-600 text-white font-bold transition-all";
+      } else if (roleName === 'SuperAdmin') {
+        viewAdmin.classList.remove('hidden');
+        heading.innerText = 'Super Admin Governance Gateway';
+        subheading.innerText = 'Platform-level escrow security, KYC identity audits, and institutional licenses.';
+        document.getElementById('tab-role-SuperAdmin').className = "px-3 py-2 rounded-xl bg-amber-500 text-slate-950 font-bold transition-all";
+      }
+
+      flyToStation('portals');
+    }
+
+    function toggleParticleEngine() {
+      isHighPerformance = !isHighPerformance;
+      createParticleField(isHighPerformance ? 2200 : 700);
+
+      const statusText = document.getElementById('perf-status-text');
+      const btn = document.getElementById('perf-toggle-btn');
+
+      if (isHighPerformance) {
+        statusText.innerText = '60 FPS • HIGH';
+        btn.className = "hidden sm:flex items-center space-x-1.5 px-2.5 py-1.5 rounded-xl bg-white/5 text-[11px] font-mono text-emerald-400 border border-emerald-500/30 transition-colors";
+      } else {
+        statusText.innerText = '30 FPS • LOW POWER';
+        btn.className = "hidden sm:flex items-center space-x-1.5 px-2.5 py-1.5 rounded-xl bg-white/5 text-[11px] font-mono text-amber-400 border border-amber-500/30 transition-colors";
+      }
+    }
+
+    function filterFunding(category) {
+      document.querySelectorAll('.funding-filter-btn').forEach(b => {
+        b.className = "funding-filter-btn px-3.5 py-1.5 rounded-xl bg-slate-800/60 text-slate-400 hover:text-white border border-white/5 text-xs font-semibold";
+      });
+      event.target.className = "funding-filter-btn active px-3.5 py-1.5 rounded-xl bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 text-xs font-semibold";
+
+      const cards = document.querySelectorAll('.funding-card');
+      cards.forEach(card => {
+        if (category === 'all' || card.getAttribute('data-category') === category) {
+          card.classList.remove('hidden');
+        } else {
+          card.classList.add('hidden');
+        }
+      });
+    }
+
+    let currentAppStep = 1;
+
+    function openApplicationFlow(title, coverage, type) {
+      document.getElementById('modal-app-title').innerText = `Apply: ${title}`;
+      document.getElementById('modal-app-sub').innerText = `Coverage: ${coverage} • Verified: ${type}`;
+      document.getElementById('confirm-app-name').innerText = title;
+      setAppStep(1);
+      toggleModal('application-modal');
+    }
+
+    function setAppStep(stepNum) {
+      currentAppStep = stepNum;
+      for (let i = 1; i <= 4; i++) {
+        const stepEl = document.getElementById(`app-step-${i}`);
+        const dotEl = document.getElementById(`step-dot-${i}`);
+        if (stepEl) {
+          if (i === stepNum) stepEl.classList.remove('hidden');
+          else stepEl.classList.add('hidden');
+        }
+        if (dotEl) {
+          if (i <= stepNum) {
+            dotEl.className = "w-8 h-8 rounded-full bg-cyan-500 text-slate-950 font-bold flex items-center justify-center text-xs";
+          } else {
+            dotEl.className = "w-8 h-8 rounded-full bg-slate-800 text-slate-400 font-bold flex items-center justify-center text-xs";
+          }
+        }
+      }
+    }
+
+    function submitApplicationAction() {
+      toggleModal('application-modal');
+      displaySystemToast("🎉 Application Submitted Successfully! Stage marked: Under Review with Escrow Routing.");
+    }
+
+    function handleCreateFunding(e) {
+      e.preventDefault();
+      const name = document.getElementById('prog-name').value;
+      const budget = document.getElementById('prog-budget').value;
+      const amount = document.getElementById('prog-amount').value;
+
+      // Dynamically append new card to funding grid
+      const container = document.getElementById('funding-cards-container');
+      const newCard = document.createElement('div');
+      newCard.className = "funding-card glass-panel p-6 rounded-2xl border border-white/10 glass-card-interactive relative group";
+      newCard.setAttribute('data-category', 'corp');
+      newCard.innerHTML = `
+        <div class="flex items-center justify-between mb-4">
+          <span class="px-2.5 py-1 rounded-lg bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[11px] font-mono font-semibold flex items-center space-x-1">
+            <i class="fa-solid fa-circle-check"></i>
+            <span>Verified Live</span>
+          </span>
+          <span class="text-xs font-mono text-slate-400"><i class="fa-regular fa-clock mr-1"></i> Newly Published</span>
+        </div>
+        <div class="flex items-center space-x-3 mb-4">
+          <div class="w-12 h-12 rounded-xl bg-purple-500/20 border border-purple-500/30 flex items-center justify-center text-purple-400 text-xl font-bold">
+            🏢
+          </div>
+          <div>
+            <h3 class="font-bold text-white text-lg group-hover:text-cyan-300 transition-colors">${name}</h3>
+            <p class="text-xs text-slate-400">Total Program Cap: ${budget}</p>
+          </div>
+        </div>
+        <div class="space-y-2 mb-6 text-xs text-slate-300">
+          <div class="flex justify-between py-1 border-b border-white/5">
+            <span class="text-slate-400">Award Amount:</span>
+            <span class="font-mono font-bold text-cyan-400 text-sm">${amount}</span>
+          </div>
+          <div class="flex justify-between py-1 border-b border-white/5">
+            <span class="text-slate-400">Status:</span>
+            <span class="text-emerald-400">Open for Submissions</span>
+          </div>
+        </div>
+        <button onclick="openApplicationFlow('${name}', '${amount}', 'Corporate Live')" class="w-full py-2.5 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-semibold text-xs transition-all shadow-md">
+          Apply Now
+        </button>
+      `;
+      container.prepend(newCard);
+
+      toggleModal('create-funding-modal');
+      displaySystemToast(`✅ Program "${name}" published into 3D Funding Space!`);
+      flyToStation('funding');
+    }
+
+    function recalculateAIMatch() {
+      const scoreEl = document.getElementById('ai-match-score');
+      scoreEl.innerText = "CALC...";
+      scoreEl.classList.add('animate-pulse');
+
+      setTimeout(() => {
+        scoreEl.innerText = "96%";
+        scoreEl.classList.remove('animate-pulse');
+        displaySystemToast("✨ Deterministic Engine: Match recalculated with refreshed CGPA parameters (96% Match).");
+      }, 800);
+    }
+
+    function toggleAIAssistantDrawer() {
+      const drawer = document.getElementById('ai-assistant-drawer');
+      drawer.classList.toggle('hidden');
+    }
+
+    function askAIAssistant(promptText) {
+      const drawer = document.getElementById('ai-assistant-drawer');
+      if (drawer.classList.contains('hidden')) drawer.classList.remove('hidden');
+
+      appendChatMessage('user', promptText);
+      generateAIResponse(promptText);
+    }
+
+    function handleAIChatSubmit(e) {
+      e.preventDefault();
+      const input = document.getElementById('ai-chat-input');
+      const val = input.value.trim();
+      if (!val) return;
+
+      appendChatMessage('user', val);
+      input.value = '';
+      generateAIResponse(val);
+    }
+
+    function appendChatMessage(sender, text) {
+      const box = document.getElementById('ai-chat-messages');
+      const msgDiv = document.createElement('div');
+      if (sender === 'user') {
+        msgDiv.className = "p-2.5 rounded-2xl bg-blue-600/30 text-white text-right self-end max-w-[85%] border border-blue-500/20";
+        msgDiv.innerText = text;
+      } else {
+        msgDiv.className = "p-2.5 rounded-2xl bg-cyan-500/10 border border-cyan-500/20 text-slate-200 text-left max-w-[90%]";
+        msgDiv.innerHTML = text;
+      }
+      box.appendChild(msgDiv);
+      box.scrollTop = box.scrollHeight;
+    }
+
+    function generateAIResponse(query) {
+      setTimeout(() => {
+        let reply = "";
+        const q = query.toLowerCase();
+
+        if (q.includes('scholarship') || q.includes('eligible')) {
+          reply = "🎯 <strong>Verified Matches Found:</strong><br>1. <em>National STEM Innovation Grant</em> (94% Match — CGPA &gt; 8.0 satisfied).<br>2. <em>Vidya Jyoti STEM Trust</em> (88% Match).";
+        } else if (q.includes('document') || q.includes('missing')) {
+          reply = "⚠️ <strong>Audit Alert:</strong> You are missing an updated Income Certificate for FY 2025-26. Your existing certificate expires in 12 days.";
+        } else if (q.includes('fee')) {
+          reply = "💳 <strong>College Fee Status:</strong><br>• Annual Fee: ₹1,20,000<br>• Scholarship Committed: ₹50,000<br>• Remaining Student Liability: ₹70,000";
+        } else {
+          reply = `🤖 I have evaluated your profile against our deterministic rules: For "${query}", you currently satisfy all prerequisites. Feel free to initiate an application!`;
+        }
+
+        appendChatMessage('ai', reply);
+      }, 500);
+    }
+
+    function handleGlobalSearch(term) {
+      const list = document.getElementById('search-results-list');
+      if (!term.trim()) {
+        list.innerHTML = `<div class="text-slate-400 p-2 text-center text-xs">Type a query or skill to search funding, internships, and courses...</div>`;
+        return;
+      }
+
+      const mockResults = [
+        { title: "National STEM Innovation Grant", type: "Scholarship", link: "funding" },
+        { title: "Nexus Systems Full-Stack Cloud Intern", type: "Internship", link: "internships" },
+        { title: "IIT Hyderabad - Engineering Faculty", type: "College", link: "portals" },
+        { title: "Future Tech Leaders Fellowship", type: "CSR Aid", link: "funding" }
+      ];
+
+      const filtered = mockResults.filter(item => item.title.toLowerCase().includes(term.toLowerCase()) || item.type.toLowerCase().includes(term.toLowerCase()));
+
+      if (filtered.length === 0) {
+        list.innerHTML = `<div class="text-slate-400 p-2 text-center text-xs">No matching results found for "${term}".</div>`;
+      } else {
+        list.innerHTML = filtered.map(item => `
+          <div onclick="flyToStation('${item.link}'); toggleModal('search-modal');" class="p-2.5 rounded-xl bg-white/5 hover:bg-cyan-500/20 border border-white/5 flex items-center justify-between cursor-pointer">
+            <div>
+              <div class="text-white font-bold">${item.title}</div>
+              <div class="text-[10px] text-slate-400">${item.type}</div>
+            </div>
+            <span class="text-cyan-400 text-xs font-mono">Fly &rarr;</span>
+          </div>
+        `).join('');
+      }
+    }
+
+    function displaySystemToast(message) {
+      const toast = document.createElement('div');
+      toast.className = "fixed top-20 right-6 z-50 glass-panel px-4 py-3 rounded-2xl border border-cyan-400/40 text-xs font-semibold text-white shadow-2xl flex items-center space-x-2 animate-bounce";
+      toast.innerHTML = `<i class="fa-solid fa-sparkles text-cyan-400"></i> <span>${message}</span>`;
+      document.body.appendChild(toast);
+      setTimeout(() => { toast.remove(); }, 4000);
+    }
+
+    function inspectCardDetails(cardId) {
+      displaySystemToast("🔍 3D Raycasting focus locked on Opportunity Node.");
+    }
+
+    function highlightGraphStep(step) {
+      displaySystemToast(`📍 Stage ${step} active: Career telemetry synchronized.`);
+    }
+
+    function bulkImportDemo() {
+      displaySystemToast("📂 Bulk Import: 120 Student records validated and imported.");
+    }
+
+    function simulateVerificationApproval() {
+      displaySystemToast("🛡️ Super Admin Audit: 4 Pending College and Trust credentials cryptographically certified.");
+    }
+
+    // Initialize 3D Engine on page load
+    window.onload = function() {
+      init3DUniverse();
+    };
+  </script>
+</body>
+</html>
